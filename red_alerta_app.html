@@ -1,0 +1,2016 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Red Alerta · App</title>
+<style>
+:root {
+  --azul:        #1A5276;
+  --azul-soft:   #2471A3;
+  --azul-pale:   #EEF4FB;
+  --rojo:        #C0392B;
+  --rojo-soft:   #E8534A;
+  --rojo-pale:   #FDECEA;
+  --amarillo:    #D4820A;
+  --amarillo-bg: #FEF3CD;
+  --verde:       #1E8449;
+  --verde-soft:  #27AE60;
+  --verde-bg:    #D5F5E3;
+  --gris-bg:     #F4F6F8;
+  --gris-borde:  #DDE3EA;
+  --gris-text:   #4A5568;
+  --gris-sub:    #8A9BB0;
+  --negro:       #1A202C;
+  --blanco:      #FFFFFF;
+  --r: 14px; --r-sm: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #CBD5E0;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: center;
+  padding: 28px 16px 48px;
+  gap: 18px;
+}
+
+/* ── PAGE META ── */
+.page-meta { text-align: center; }
+.page-meta h1 { font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #718096; }
+.page-meta p  { font-size: 12px; color: #A0AEC0; margin-top: 3px; }
+
+/* ── PHONE ── */
+.phone {
+  width: 375px;
+  background: #111;
+  border-radius: 50px;
+  padding: 16px 13px;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.4), inset 0 0 0 1px rgba(255,255,255,0.07);
+}
+.phone-notch {
+  width: 110px; height: 26px;
+  background: #111; border-radius: 0 0 18px 18px;
+  margin: 0 auto 8px;
+}
+.phone-screen {
+  background: var(--gris-bg);
+  border-radius: 34px;
+  overflow: hidden;
+  height: 720px;
+  display: flex; flex-direction: column;
+  position: relative;
+}
+
+/* ── STATUS ── */
+.status-bar {
+  background: var(--azul);
+  padding: 9px 20px 7px;
+  display: flex; justify-content: space-between; align-items: center;
+  flex-shrink: 0;
+}
+.status-bar .time { font-size: 11px; font-weight: 700; color: white; }
+.status-bar .icons { font-size: 10px; color: rgba(255,255,255,0.8); letter-spacing: 2px; }
+
+/* ── SCREENS ── */
+.screen {
+  display: none; flex-direction: column; flex: 1; overflow: hidden;
+}
+.screen.active { display: flex; }
+
+.screen-scroll {
+  flex: 1; overflow-y: auto; padding: 13px 13px 76px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.screen-scroll::-webkit-scrollbar { width: 2px; }
+.screen-scroll::-webkit-scrollbar-thumb { background: var(--gris-borde); border-radius: 2px; }
+
+/* ── HEADERS ── */
+.app-header {
+  background: var(--azul);
+  padding: 6px 18px 16px;
+  flex-shrink: 0;
+}
+.back-row {
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 8px; cursor: pointer;
+  font-size: 12px; color: rgba(255,255,255,0.7);
+}
+.back-row:hover { color: white; }
+.app-header h2 { font-size: 20px; font-weight: 800; color: white; letter-spacing: -0.3px; }
+.app-header p  { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 2px; }
+
+/* ── NAV BAR ── */
+.nav-bar {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: white;
+  border-top: 1px solid var(--gris-borde);
+  padding: 8px 0 12px;
+  display: flex; justify-content: space-around;
+  border-radius: 0 0 34px 34px;
+  z-index: 10;
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  font-size: 9px; color: var(--gris-sub); font-weight: 600;
+  cursor: pointer; padding: 0 10px;
+  transition: color 0.15s;
+}
+.nav-item.active { color: var(--azul); }
+.nav-item .ni { font-size: 20px; }
+
+/* ── SHARED COMPONENTS ── */
+.section-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--gris-sub); padding: 4px 2px 0;
+}
+.card {
+  background: white; border-radius: var(--r);
+  border: 1.5px solid var(--gris-borde); overflow: hidden;
+}
+.card-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+
+.alert-banner {
+  border-radius: var(--r-sm); padding: 12px 14px;
+  display: flex; gap: 10px; align-items: flex-start;
+}
+.ab-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+.ab-title { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
+.ab-text  { font-size: 11px; line-height: 1.5; }
+.banner-rojo    { background: var(--rojo-pale);   border-left: 3px solid var(--rojo); }
+.banner-amar    { background: var(--amarillo-bg); border-left: 3px solid var(--amarillo); }
+.banner-azul    { background: var(--azul-pale);   border-left: 3px solid var(--azul-soft); }
+.t-rojo  { color: var(--rojo); }
+.t-amar  { color: var(--amarillo); }
+.t-azul  { color: var(--azul); }
+.t-dark-rojo { color: #7B1A1A; }
+.t-dark-amar { color: #7A4A00; }
+
+.tip-box {
+  background: var(--azul-pale); border-radius: var(--r-sm);
+  padding: 11px 13px; display: flex; gap: 9px; align-items: flex-start;
+}
+.tip-box .ti { font-size: 16px; flex-shrink: 0; }
+.tip-box p { font-size: 11px; color: var(--gris-text); line-height: 1.5; }
+.tip-box strong { color: var(--azul); }
+
+.signal-item { display: flex; gap: 9px; align-items: flex-start; }
+.sdot { width: 7px; height: 7px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+.sdot-r { background: var(--rojo); }
+.sdot-a { background: var(--amarillo); }
+.sdot-b { background: var(--azul-soft); }
+.signal-text { font-size: 12px; color: var(--gris-text); line-height: 1.45; flex: 1; }
+.signal-text strong { color: var(--negro); font-weight: 700; }
+
+.steps { display: flex; flex-direction: column; }
+.step-item {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 10px 0; border-bottom: 1px solid var(--gris-borde);
+}
+.step-item:last-child { border-bottom: none; padding-bottom: 0; }
+.step-num {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--azul); color: white;
+  font-size: 11px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
+}
+.step-num.sr { background: var(--rojo); }
+.step-title { font-size: 12px; font-weight: 700; color: var(--negro); margin-bottom: 3px; }
+.step-text  { font-size: 11px; color: var(--gris-text); line-height: 1.45; }
+
+.frase-si {
+  background: var(--verde-bg); border-radius: var(--r-sm);
+  padding: 11px 13px; border-left: 3px solid var(--verde);
+}
+.frase-si .fl { font-size: 9px; font-weight: 700; letter-spacing: 0.09em;
+  text-transform: uppercase; color: var(--verde); margin-bottom: 5px; }
+.frase-si .ft { font-size: 12px; color: #1A4A2A; line-height: 1.5; font-style: italic; }
+
+.frase-no {
+  background: var(--rojo-pale); border-radius: var(--r-sm);
+  padding: 11px 13px; border-left: 3px solid var(--rojo-soft);
+}
+.frase-no .fl { font-size: 9px; font-weight: 700; letter-spacing: 0.09em;
+  text-transform: uppercase; color: var(--rojo); margin-bottom: 5px; }
+.fn-item { font-size: 11px; color: #7B1A1A; line-height: 1.5; display: flex; gap: 6px; margin-bottom: 4px; }
+.fn-item:last-child { margin-bottom: 0; }
+.fn-x { color: var(--rojo); font-weight: 700; flex-shrink: 0; }
+
+.frase-porque {
+  background: var(--amarillo-bg); border-radius: var(--r-sm);
+  padding: 9px 13px; border-left: 3px solid var(--amarillo);
+}
+.frase-porque .fl { font-size: 9px; font-weight: 700; letter-spacing: 0.09em;
+  text-transform: uppercase; color: var(--amarillo); margin-bottom: 4px; }
+.frase-porque p { font-size: 11px; color: #5C3A00; line-height: 1.45; }
+
+.reaccion-item { border-bottom: 1px solid var(--gris-borde); }
+.reaccion-item:last-child { border-bottom: none; }
+.reaccion-toggle {
+  width: 100%; background: none; border: none;
+  padding: 10px 0; cursor: pointer;
+  display: flex; justify-content: space-between; align-items: center; text-align: left;
+}
+.rt-left { display: flex; gap: 8px; align-items: center; }
+.rt-emoji { font-size: 15px; }
+.rt-label { font-size: 12px; font-weight: 700; color: var(--negro); }
+.rt-arrow { font-size: 10px; color: var(--gris-sub); transition: transform 0.2s; }
+.reaccion-item.open .rt-arrow { transform: rotate(90deg); }
+.reaccion-body { display: none; padding: 0 0 10px 26px; }
+.reaccion-item.open .reaccion-body { display: block; }
+.rb-text { font-size: 11px; color: var(--gris-text); line-height: 1.5; margin-bottom: 6px; }
+.rb-frase { background: var(--verde-bg); border-radius: 6px; padding: 8px 11px;
+  border-left: 2px solid var(--verde); font-size: 11px; color: #1A4A2A; font-style: italic; line-height: 1.4; }
+
+.despues-item { display: flex; gap: 10px; align-items: flex-start;
+  padding: 8px 0; border-bottom: 1px solid var(--gris-borde); }
+.despues-item:last-child { border-bottom: none; }
+.di-check { width: 22px; height: 22px; border-radius: 6px; background: var(--azul-pale);
+  border: 1.5px solid var(--azul-soft); display: flex; align-items: center;
+  justify-content: center; font-size: 12px; flex-shrink: 0; margin-top: 1px; }
+.di-text { font-size: 12px; color: var(--gris-text); line-height: 1.45; }
+.di-text strong { color: var(--negro); }
+
+.nota-legal { background: var(--gris-bg); border-radius: var(--r-sm);
+  padding: 10px 12px; border: 1px dashed var(--gris-borde); }
+.nota-legal p { font-size: 10px; color: var(--gris-sub); line-height: 1.5; text-align: center; }
+
+.btn { border: none; border-radius: var(--r-sm); padding: 13px 16px; width: 100%;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-rojo  { background: var(--rojo); color: white; }
+.btn-azul  { background: var(--azul); color: white; }
+.btn-ghost { background: white; color: var(--azul); border: 1.5px solid var(--azul); }
+
+/* ════════════════════════════════════════
+   SCREEN 1 · INICIO
+═══════════════════════════════════════ */
+#sc-home .home-header {
+  background: var(--azul); padding: 6px 18px 18px; flex-shrink: 0; position: relative;
+}
+.logo-row { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
+.logo-icon { width: 30px; height: 30px; background: var(--rojo-soft); border-radius: 9px;
+  display: flex; align-items: center; justify-content: center; font-size: 16px; }
+.logo-row h2 { font-size: 18px; font-weight: 800; color: white; letter-spacing: -0.3px; }
+.tagline { font-size: 11px; color: rgba(255,255,255,0.6); letter-spacing: 0.04em; margin-left: 38px; }
+.dept-pill { position: absolute; top: 10px; right: 14px; background: rgba(255,255,255,0.15);
+  border-radius: 20px; padding: 4px 10px; font-size: 10px; color: rgba(255,255,255,0.85);
+  font-weight: 600; }
+
+.urgency-card { background: var(--rojo); border-radius: var(--r); padding: 16px;
+  position: relative; cursor: pointer; }
+.urgency-card::before { content: ''; position: absolute; top: -20px; right: -20px;
+  width: 90px; height: 90px; border-radius: 50%; background: rgba(255,255,255,0.07);
+  pointer-events: none; }
+.uc-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: rgba(255,255,255,0.75); margin-bottom: 5px; }
+.uc-title { font-size: 15px; font-weight: 800; color: white; line-height: 1.25;
+  margin-bottom: 12px; padding-right: 20px; }
+.uc-btn { background: white; color: var(--rojo); border: none; border-radius: 8px;
+  padding: 11px 12px; font-size: 12px; font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+  width: 100%; white-space: nowrap; line-height: 1.2; }
+
+.quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.quick-btn { background: white; border-radius: var(--r-sm); padding: 12px 10px;
+  border: 1.5px solid var(--gris-borde); cursor: pointer; text-align: left; }
+.quick-btn:hover { border-color: var(--azul-soft); }
+.qb-icon  { font-size: 22px; margin-bottom: 5px; display: block; }
+.qb-title { font-size: 12px; font-weight: 700; color: var(--negro); line-height: 1.2; }
+.qb-sub   { font-size: 10px; color: var(--gris-sub); margin-top: 1px; }
+
+.crisis-bar { background: var(--negro); border-radius: var(--r-sm); padding: 12px 14px;
+  display: flex; align-items: center; justify-content: space-between; }
+.cb-dot { width: 8px; height: 8px; background: #2ECC71; border-radius: 50%;
+  box-shadow: 0 0 0 3px rgba(46,204,113,0.25); }
+.cb-left { display: flex; align-items: center; gap: 10px; }
+.cb-txt  { font-size: 12px; color: white; font-weight: 600; }
+.cb-sub  { font-size: 10px; color: rgba(255,255,255,0.5); }
+.cb-num  { font-size: 14px; font-weight: 800; color: #2ECC71; letter-spacing: 0.5px; }
+
+.resource-row { background: white; border-radius: var(--r-sm); padding: 11px 13px;
+  display: flex; align-items: center; gap: 10px; border: 1.5px solid var(--gris-borde); }
+.rr-icon { font-size: 20px; }
+.rr-title { font-size: 12px; font-weight: 700; color: var(--negro); }
+.rr-sub   { font-size: 10px; color: var(--gris-sub); }
+.rr-badge { margin-left: auto; font-size: 9px; font-weight: 700;
+  padding: 2px 7px; border-radius: 20px; white-space: nowrap; }
+.badge-open { background: var(--verde-bg); color: var(--verde); }
+.badge-24h  { background: var(--rojo-pale); color: var(--rojo); }
+
+/* ════════════════════════════════════════
+   SCREEN 7 · SEÑALES DE ALERTA
+═══════════════════════════════════════ */
+.signal-header { background: var(--amarillo); padding: 6px 18px 16px; flex-shrink: 0; }
+.signal-header h2 { font-size: 20px; font-weight: 800; color: white; letter-spacing: -0.3px; }
+.signal-header p  { font-size: 11px; color: rgba(255,255,255,0.7); margin-top: 2px; }
+
+.signal-cat-tabs {
+  background: var(--amarillo); padding: 0 12px 12px;
+  display: flex; gap: 6px; flex-shrink: 0;
+}
+.sct { flex: 1; background: rgba(255,255,255,0.18); border: none; border-radius: 10px;
+  padding: 8px 4px; cursor: pointer; text-align: center; transition: all 0.18s; }
+.sct.active { background: white; }
+.sct .sct-icon  { font-size: 15px; display: block; margin-bottom: 2px; }
+.sct .sct-label { font-size: 9px; font-weight: 700; line-height: 1.2; color: rgba(255,255,255,0.85); }
+.sct.active .sct-label { color: var(--amarillo); }
+
+.signal-cat { display: none; flex-direction: column; gap: 10px; }
+.signal-cat.active { display: flex; }
+
+.urgency-row { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
+.urgency-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.urgency-dot-r { background: var(--rojo); }
+.urgency-dot-a { background: var(--amarillo); }
+.urgency-dot-b { background: var(--azul-soft); }
+.urgency-text { font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; }
+.urgency-text-r { color: var(--rojo); }
+.urgency-text-a { color: var(--amarillo); }
+.urgency-text-b { color: var(--azul-soft); }
+
+.signal-group { background: white; border-radius: var(--r);
+  border: 1.5px solid var(--gris-borde); overflow: hidden; }
+.signal-group-header { padding: 11px 14px 8px;
+  border-bottom: 1px solid var(--gris-borde);
+  display: flex; align-items: center; gap: 8px; }
+.sgh-icon  { font-size: 16px; }
+.sgh-title { font-size: 12px; font-weight: 700; color: var(--negro); }
+.signal-group-body { padding: 10px 14px; display: flex; flex-direction: column; gap: 7px; }
+
+.sig-item { display: flex; gap: 9px; align-items: flex-start; }
+.sig-pill {
+  font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 20px;
+  white-space: nowrap; flex-shrink: 0; margin-top: 2px;
+}
+.sig-pill-r { background: var(--rojo-pale); color: var(--rojo); }
+.sig-pill-a { background: var(--amarillo-bg); color: var(--amarillo); }
+.sig-pill-b { background: var(--azul-pale); color: var(--azul-soft); }
+.sig-text { font-size: 12px; color: var(--gris-text); line-height: 1.45; }
+.sig-text strong { color: var(--negro); }
+
+.action-prompt {
+  background: var(--rojo); border-radius: var(--r-sm);
+  padding: 13px 14px; display: flex; gap: 10px; align-items: center; cursor: pointer;
+}
+.action-prompt .ap-icon { font-size: 22px; flex-shrink: 0; }
+.action-prompt .ap-text { flex: 1; }
+.action-prompt .ap-title { font-size: 13px; font-weight: 800; color: white; }
+.action-prompt .ap-sub   { font-size: 11px; color: rgba(255,255,255,0.75); margin-top: 2px; }
+.action-prompt .ap-arr   { font-size: 16px; color: rgba(255,255,255,0.8); }
+
+/* ════════════════════════════════════════
+   SCREEN 6 · FORMACIÓN
+═══════════════════════════════════════ */
+.form-header { background: var(--azul); padding: 6px 18px 16px; flex-shrink: 0; }
+.form-header h2 { font-size: 20px; font-weight: 800; color: white; letter-spacing: -0.3px; }
+.form-header p  { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 2px; }
+.form-progress-bar { background: rgba(255,255,255,0.2); border-radius: 4px; height: 5px; margin-top: 12px; }
+.form-progress-fill { height: 5px; border-radius: 4px; background: white; transition: width 0.4s; }
+.form-progress-label { font-size: 10px; color: rgba(255,255,255,0.65); margin-top: 5px; text-align: right; }
+.mod-card { background: white; border-radius: var(--r); border: 1.5px solid var(--gris-borde);
+  padding: 13px 14px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: border-color 0.15s; }
+.mod-card:hover { border-color: var(--azul-soft); }
+.mod-card.done  { border-color: var(--verde); background: #F6FFF9; }
+.mod-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center;
+  justify-content: center; font-size: 20px; flex-shrink: 0; }
+.mod-icon-azul  { background: var(--azul-pale); }
+.mod-icon-rojo  { background: var(--rojo-pale); }
+.mod-icon-amar  { background: var(--amarillo-bg); }
+.mod-icon-verde { background: var(--verde-bg); }
+.mod-icon-gris  { background: var(--gris-bg); }
+.mod-info { flex: 1; }
+.mod-num   { font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--gris-sub); margin-bottom: 2px; }
+.mod-title { font-size: 13px; font-weight: 700; color: var(--negro); line-height: 1.2; }
+.mod-meta  { font-size: 10px; color: var(--gris-sub); margin-top: 3px; }
+.mod-badge { flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 12px; }
+.mod-badge.todo { background: var(--gris-bg); border: 1.5px solid var(--gris-borde); color: transparent; }
+.mod-badge.done { background: var(--verde-bg); border: 1.5px solid var(--verde); color: var(--verde); }
+.mod-inner { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+.mod-inner.active { display: flex; }
+.mod-inner-header { background: var(--azul); padding: 6px 18px 16px; flex-shrink: 0; }
+.mod-inner-num   { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  color: rgba(255,255,255,0.6); margin-bottom: 4px; }
+.mod-inner-title { font-size: 17px; font-weight: 800; color: white; line-height: 1.2; }
+.mod-inner-meta  { font-size: 11px; color: rgba(255,255,255,0.55); margin-top: 3px; }
+.mod-read-bar  { background: rgba(255,255,255,0.2); border-radius: 4px; height: 3px; margin-top: 10px; }
+.mod-read-fill { height: 3px; border-radius: 4px; background: white; transition: width 0.5s; }
+.content-block { background: white; border-radius: var(--r); border: 1.5px solid var(--gris-borde); padding: 14px; }
+.cb-head { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--azul-soft); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.cb-body { font-size: 12px; color: var(--gris-text); line-height: 1.6; }
+.cb-body strong { color: var(--negro); }
+.key-point { display: flex; gap: 10px; align-items: flex-start;
+  padding: 8px 0; border-bottom: 1px solid var(--gris-borde); }
+.key-point:last-child { border-bottom: none; padding-bottom: 0; }
+.kp-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.kp-text { font-size: 12px; color: var(--gris-text); line-height: 1.45; }
+.kp-text strong { color: var(--negro); }
+.highlight-box { background: var(--azul-pale); border-radius: var(--r-sm);
+  padding: 12px 13px; border-left: 3px solid var(--azul-soft); }
+.hb-label { font-size: 9px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--azul); margin-bottom: 5px; }
+.hb-text  { font-size: 12px; color: var(--gris-text); line-height: 1.5; }
+.hb-text strong { color: var(--azul); }
+.mito-card { border-radius: var(--r-sm); overflow: hidden; border: 1.5px solid var(--gris-borde); }
+.mito-row { display: flex; }
+.mito-label { width: 32px; flex-shrink: 0; display: flex; align-items: center;
+  justify-content: center; font-size: 14px; font-weight: 800; }
+.mito-label.mito { background: var(--rojo-pale); color: var(--rojo); }
+.mito-label.real { background: var(--verde-bg); color: var(--verde); }
+.mito-content { flex: 1; padding: 10px 12px; }
+.mito-content.mito-bg { background: var(--rojo-pale); }
+.mito-content.real-bg { background: var(--verde-bg); }
+.mito-title { font-size: 9px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; margin-bottom: 3px; }
+.mito-title.t-rojo  { color: var(--rojo); }
+.mito-title.t-verde { color: var(--verde); }
+.mito-text { font-size: 11px; line-height: 1.4; }
+.mito-text.t-dark-rojo  { color: #7B1A1A; }
+.mito-text.t-dark-verde { color: #1A4A2A; }
+.mito-divider { height: 1px; background: var(--gris-borde); }
+.mark-done-btn { background: var(--verde); color: white; border: none; border-radius: var(--r-sm);
+  padding: 13px; width: 100%; font-size: 13px; font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px; }
+.mark-done-btn.already { background: var(--verde-bg); color: var(--verde); border: 1.5px solid var(--verde); }
+.nav-bar .nav-item { font-size: 8px; padding: 0 4px; }
+.nav-bar .ni { font-size: 16px; }
+
+/* ════════════════════════════════════════
+   SCREEN 2 · EVALUACIÓN
+═══════════════════════════════════════ */
+.eval-header { background: var(--azul); padding: 4px 18px 16px; flex-shrink: 0; }
+.progress-wrap { background: rgba(255,255,255,0.2); border-radius: 4px; height: 4px; margin-top: 12px; }
+.progress-fill { height: 4px; border-radius: 4px; background: white; transition: width 0.3s; }
+
+.question-card { background: white; border-radius: var(--r); padding: 14px; border: 1.5px solid var(--gris-borde); }
+.q-step { font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--azul-soft); margin-bottom: 4px; }
+.q-text { font-size: 14px; font-weight: 700; color: var(--negro); margin-bottom: 12px; line-height: 1.3; }
+.option-btn { width: 100%; background: var(--gris-bg); border: 1.5px solid var(--gris-borde);
+  border-radius: var(--r-sm); padding: 10px 12px; margin-bottom: 7px; cursor: pointer;
+  text-align: left; display: flex; align-items: center; gap: 10px; transition: all 0.15s; }
+.option-btn:last-child { margin-bottom: 0; }
+.option-btn:hover { border-color: var(--azul-soft); background: var(--azul-pale); }
+.option-btn.sel { border-color: var(--azul); background: var(--azul-pale); }
+.ob-icon  { font-size: 18px; }
+.ob-text  { font-size: 12px; font-weight: 600; color: var(--negro); flex: 1; }
+.ob-check { margin-left: auto; width: 18px; height: 18px; border: 2px solid var(--gris-borde);
+  border-radius: 50%; flex-shrink: 0; display: flex; align-items: center;
+  justify-content: center; font-size: 10px; }
+.option-btn.sel .ob-check { background: var(--azul); border-color: var(--azul); color: white; }
+
+.profile-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.profile-chip { background: var(--gris-bg); border: 1.5px solid var(--gris-borde);
+  border-radius: 6px; padding: 5px 10px; font-size: 11px; color: var(--gris-text); cursor: pointer; }
+.profile-chip.sel { background: var(--azul-pale); border-color: var(--azul); color: var(--azul); font-weight: 700; }
+
+/* ════════════════════════════════════════
+   SCREEN 3 · RESULTADO
+═══════════════════════════════════════ */
+.result-header { background: var(--amarillo); padding: 14px 18px 18px; flex-shrink: 0; }
+.result-header.rh-rojo  { background: var(--rojo); }
+.result-header.rh-verde { background: var(--verde); }
+.semaforo-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.sem { width: 14px; height: 14px; border-radius: 50%; opacity: 0.3; }
+.sem.on { opacity: 1; }
+.sem-r { background: var(--rojo); }
+.sem-a { background: var(--amarillo); filter: brightness(0.75); }
+.sem-v { background: var(--verde-soft); }
+.result-header h2 { font-size: 16px; font-weight: 800; color: white; line-height: 1.2; }
+.result-header p  { font-size: 11px; color: rgba(255,255,255,0.8); margin-top: 4px; }
+
+.action-card { background: white; border-radius: var(--r); padding: 14px; border: 1.5px solid var(--gris-borde); }
+.ac-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--amarillo); margin-bottom: 6px; }
+.ac-title { font-size: 13px; font-weight: 700; color: var(--negro); margin-bottom: 5px; }
+.ac-text  { font-size: 11px; color: var(--gris-text); line-height: 1.5; }
+
+.frase-card { background: var(--amarillo-bg); border-radius: var(--r-sm); padding: 12px;
+  border-left: 3px solid var(--amarillo); }
+.fc-label { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: #92660A; margin-bottom: 4px; }
+.fc-text { font-size: 12px; color: #5C4A00; font-style: italic; line-height: 1.4; }
+
+.nohacer-card { background: var(--rojo-pale); border-radius: var(--r-sm); padding: 12px;
+  border-left: 3px solid var(--rojo-soft); }
+.nh-label { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--rojo); margin-bottom: 6px; }
+.nh-item { font-size: 11px; color: #7B1A1A; margin-bottom: 3px; display: flex; gap: 5px; }
+
+.call-btn { background: var(--rojo); color: white; border: none; border-radius: var(--r-sm);
+  padding: 13px; width: 100%; font-size: 14px; font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px; }
+.call-num { font-size: 16px; letter-spacing: 1px; }
+
+/* ════════════════════════════════════════
+   SCREEN 4 · COMO HABLAR — TABS
+═══════════════════════════════════════ */
+.sit-tabs { background: var(--azul); padding: 0 12px 12px; display: flex; gap: 6px; flex-shrink: 0; }
+.sit-tab { flex: 1; background: rgba(255,255,255,0.12); border: none; border-radius: 10px;
+  padding: 8px 4px; cursor: pointer; text-align: center; transition: all 0.18s; }
+.sit-tab.active { background: white; }
+.st-icon  { font-size: 15px; display: block; margin-bottom: 2px; }
+.st-label { font-size: 9px; font-weight: 700; line-height: 1.2; color: rgba(255,255,255,0.8); }
+.sit-tab.active .st-label { color: var(--azul); }
+
+.sit-panel { display: none; flex-direction: column; gap: 10px; }
+.sit-panel.active { display: flex; }
+
+/* ════════════════════════════════════════
+   SCREEN 5 · DIRECTORIO
+═══════════════════════════════════════ */
+.dir-header { background: var(--azul); padding: 6px 18px 16px; flex-shrink: 0; }
+.dir-header h2 { font-size: 18px; font-weight: 800; color: white; }
+.dir-header p  { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 2px; }
+
+.search-bar { background: white; border-radius: var(--r-sm); padding: 9px 12px;
+  display: flex; align-items: center; gap: 8px; border: 1.5px solid var(--gris-borde); }
+.search-bar input { border: none; outline: none; font-size: 12px; color: var(--gris-text);
+  background: transparent; flex: 1; }
+
+.filter-row { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+.fchip { background: white; border: 1.5px solid var(--gris-borde); border-radius: 20px;
+  padding: 4px 10px; font-size: 10px; font-weight: 700; color: var(--gris-text);
+  white-space: nowrap; cursor: pointer; }
+.fchip.active { background: var(--azul); border-color: var(--azul); color: white; }
+
+.dir-divider { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--gris-sub); padding: 4px 0; display: flex; align-items: center; gap: 8px; }
+.dir-divider::before, .dir-divider::after { content: ''; flex: 1; height: 1px; background: var(--gris-borde); }
+
+.dir-item { background: white; border-radius: var(--r-sm); padding: 11px 12px;
+  border: 1.5px solid var(--gris-borde); display: flex; gap: 10px; align-items: flex-start; }
+.dir-ico { width: 36px; height: 36px; border-radius: 8px; display: flex;
+  align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.di-r { background: var(--rojo-pale); }
+.di-b { background: var(--azul-pale); }
+.di-v { background: var(--verde-bg); }
+.dir-inf { flex: 1; }
+.di-name { font-size: 12px; font-weight: 700; color: var(--negro); }
+.di-sub  { font-size: 10px; color: var(--gris-sub); margin-top: 1px; }
+.di-num  { font-size: 12px; font-weight: 700; color: var(--azul-soft); margin-top: 4px; }
+.dir-acts { display: flex; flex-direction: column; gap: 4px; }
+.dir-call-btn { background: var(--azul); color: white; border: none; border-radius: 6px;
+  padding: 5px 10px; font-size: 10px; font-weight: 700; cursor: pointer; }
+.di-hours { font-size: 9px; color: var(--gris-sub); text-align: right; }
+.avail { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 3px; }
+.avail-on  { background: var(--verde-soft); }
+.avail-off { background: var(--gris-sub); }
+
+/* ── FLOW LEGEND ── */
+.flow-legend {
+  background: white; border-radius: 12px; padding: 16px 20px;
+  max-width: 375px; width: 100%; border: 1.5px solid #CBD5E0;
+}
+.flow-legend .fl-title { font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--gris-sub); margin-bottom: 10px; }
+.flow-steps { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.fs { background: var(--azul-pale); border-radius: 7px; padding: 6px 10px;
+  font-size: 11px; font-weight: 700; color: var(--azul); }
+.fa { color: var(--gris-sub); font-size: 14px; }
+
+@media (max-width: 420px) { .phone { width: 340px; } }
+</style>
+</head>
+<body>
+
+<div class="page-meta">
+  <h1>Red Alerta · App completa</h1>
+  <p>Navegá entre pantallas con la barra inferior · Prototipo interactivo</p>
+</div>
+
+<div class="phone">
+  <div class="phone-notch"></div>
+  <div class="phone-screen">
+
+    <!-- STATUS BAR -->
+    <div class="status-bar">
+      <span class="time">9:41</span>
+      <span class="icons">▲▲▲ 🔋</span>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         PANTALLA 1 · INICIO
+    ═══════════════════════════════════════ -->
+    <div class="screen active" id="sc-home">
+      <div class="home-header">
+        <div class="logo-row">
+          <div class="logo-icon">🔔</div>
+          <h2>Red Alerta</h2>
+        </div>
+        <div class="tagline">Detección temprana · Salud mental</div>
+        <div class="dept-pill">📍 Montevideo</div>
+      </div>
+      <div class="screen-scroll">
+
+        <div class="urgency-card" onclick="goTo('sc-eval')">
+          <div class="uc-label">¿Algo no está bien?</div>
+          <div class="uc-title">Estoy preocupado/a por alguien</div>
+          <button class="uc-btn">▶&nbsp; Iniciar evaluación</button>
+        </div>
+
+        <div class="section-label">Acceso rápido</div>
+        <div class="quick-grid">
+          <div class="quick-btn" onclick="goTo('sc-hablar')">
+            <span class="qb-icon">💬</span>
+            <div class="qb-title">Cómo hablar</div>
+            <div class="qb-sub">Guía de conversación</div>
+          </div>
+          <div class="quick-btn" onclick="goTo('sc-dir')">
+            <span class="qb-icon">📍</span>
+            <div class="qb-title">Dónde derivar</div>
+            <div class="qb-sub">Recursos en mi zona</div>
+          </div>
+          <div class="quick-btn" onclick="goTo('sc-senales')">
+            <span class="qb-icon">🔎</span>
+            <div class="qb-title">Señales de alerta</div>
+            <div class="qb-sub">Qué observar</div>
+          </div>
+          <div class="quick-btn" onclick="goTo('sc-form')">
+            <span class="qb-icon">📖</span>
+            <div class="qb-title">Formación</div>
+            <div class="qb-sub">Curso mhGAP</div>
+          </div>
+        </div>
+
+        <div class="section-label">Línea de crisis — 24 hs</div>
+        <div class="crisis-bar">
+          <div class="cb-left">
+            <div class="cb-dot"></div>
+            <div>
+              <div class="cb-txt">Línea de Crisis MSP</div>
+              <div class="cb-sub">Disponible ahora mismo</div>
+            </div>
+          </div>
+          <div class="cb-num">0800 0767</div>
+        </div>
+
+        <div class="section-label">Recursos cercanos</div>
+        <div class="resource-row">
+          <div class="rr-icon">🏥</div>
+          <div>
+            <div class="rr-title">Centro Comunal N°8</div>
+            <div class="rr-sub">Psicólogo · Montevideo</div>
+          </div>
+          <div class="rr-badge badge-open">Abierto</div>
+        </div>
+        <div class="resource-row">
+          <div class="rr-icon">📞</div>
+          <div>
+            <div class="rr-title">Línea de Violencia</div>
+            <div class="rr-sub">MIDES · 0800 4141</div>
+          </div>
+          <div class="rr-badge badge-24h">24 hs</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         PANTALLA 2 · EVALUACIÓN GUIADA
+    ═══════════════════════════════════════ -->
+    <div class="screen" id="sc-eval">
+      <div class="eval-header">
+        <div class="back-row" onclick="goTo('sc-home')">← Inicio</div>
+        <h2 style="font-size:20px; font-weight:800; color:white; letter-spacing:-0.3px;">🔍 Evaluación guiada</h2>
+        <p style="font-size:11px; color:rgba(255,255,255,0.6); margin-top:2px;">3 preguntas · menos de 2 minutos</p>
+        <div class="progress-wrap">
+          <div class="progress-fill" id="eval-progress" style="width:33%"></div>
+        </div>
+      </div>
+      <div class="screen-scroll">
+
+        <!-- Paso 1 -->
+        <div id="eval-q1">
+          <div class="question-card">
+            <div class="q-step">Pregunta 1 de 3</div>
+            <div class="q-text">¿A quién estás observando?</div>
+            <div class="option-btn" onclick="selectOpt(this,'q1')">
+              <span class="ob-icon">🧒</span><span class="ob-text">Un niño o niña (menor de 12)</span>
+              <div class="ob-check"></div>
+            </div>
+            <div class="option-btn" onclick="selectOpt(this,'q1')">
+              <span class="ob-icon">🧑‍🎓</span><span class="ob-text">Un/a adolescente (12–17)</span>
+              <div class="ob-check"></div>
+            </div>
+            <div class="option-btn" onclick="selectOpt(this,'q1')">
+              <span class="ob-icon">👤</span><span class="ob-text">Un adulto o adulta</span>
+              <div class="ob-check"></div>
+            </div>
+            <div class="option-btn" onclick="selectOpt(this,'q1')">
+              <span class="ob-icon">👴</span><span class="ob-text">Una persona mayor (+65)</span>
+              <div class="ob-check"></div>
+            </div>
+          </div>
+          <button class="btn btn-azul" onclick="evalNext(2)" style="margin-top:2px;">Siguiente →</button>
+          <p style="text-align:center; font-size:10px; color:var(--gris-sub);">Esta evaluación no es un diagnóstico clínico</p>
+        </div>
+
+        <!-- Paso 2 -->
+        <div id="eval-q2" style="display:none; flex-direction:column; gap:10px;">
+          <div class="question-card">
+            <div class="q-step">Pregunta 2 de 3</div>
+            <div class="q-text">¿Qué es lo que notaste?</div>
+            <div class="option-btn" onclick="selectOpt(this,'q2')">
+              <span class="ob-icon">💬</span><span class="ob-text">Hizo comentarios preocupantes</span><div class="ob-check"></div>
+            </div>
+            <div class="option-btn" onclick="selectOpt(this,'q2')">
+              <span class="ob-icon">😰</span><span class="ob-text">Está en crisis ahora (llanto, angustia)</span><div class="ob-check"></div>
+            </div>
+            <div class="option-btn" onclick="selectOpt(this,'q2')">
+              <span class="ob-icon">😶</span><span class="ob-text">Se aisló o cambió su comportamiento</span><div class="ob-check"></div>
+            </div>
+            <div class="option-btn" onclick="selectOpt(this,'q2')">
+              <span class="ob-icon">🍺</span><span class="ob-text">Consumo de alcohol u otras sustancias</span><div class="ob-check"></div>
+            </div>
+            <div class="option-btn" onclick="selectOpt(this,'q2')">
+              <span class="ob-icon">❓</span><span class="ob-text">Algo me preocupa, no sé qué</span><div class="ob-check"></div>
+            </div>
+          </div>
+          <button class="btn btn-azul" onclick="evalNext(3)">Siguiente →</button>
+          <button class="btn btn-ghost" onclick="evalNext(1)" style="margin-top:-4px;">← Volver</button>
+        </div>
+
+        <!-- Paso 3 -->
+        <div id="eval-q3" style="display:none; flex-direction:column; gap:10px;">
+          <div class="question-card">
+            <div class="q-step">Pregunta 3 de 3</div>
+            <div class="q-text">¿Con qué urgencia percibís la situación?</div>
+            <div class="option-btn" onclick="selectOpt(this,'q3')">
+              <span class="ob-icon">🚨</span><span class="ob-text">Está en crisis ahora mismo</span><div class="ob-check"></div>
+            </div>
+            <div class="option-btn" onclick="selectOpt(this,'q3')">
+              <span class="ob-icon">⚠️</span><span class="ob-text">Algo que viene pasando hace días</span><div class="ob-check"></div>
+            </div>
+            <div class="option-btn" onclick="selectOpt(this,'q3')">
+              <span class="ob-icon">🔍</span><span class="ob-text">Una intuición, no estoy seguro/a</span><div class="ob-check"></div>
+            </div>
+          </div>
+          <button class="btn btn-rojo" onclick="goTo('sc-resultado')">Ver mi plan de acción →</button>
+          <button class="btn btn-ghost" onclick="evalNext(2)" style="margin-top:-4px;">← Volver</button>
+          <p style="text-align:center; font-size:10px; color:var(--gris-sub);">Esta evaluación no es un diagnóstico clínico</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         PANTALLA 3 · RESULTADO / PLAN DE ACCIÓN
+    ═══════════════════════════════════════ -->
+    <div class="screen" id="sc-resultado">
+      <div class="result-header">
+        <div class="semaforo-row">
+          <div class="sem sem-r"></div>
+          <div class="sem sem-a on"></div>
+          <div class="sem sem-v"></div>
+        </div>
+        <h2>Situación que requiere atención pronto</h2>
+        <p>Adolescente · Comentarios preocupantes · Hace días</p>
+      </div>
+      <div class="screen-scroll">
+
+        <div class="action-card">
+          <div class="ac-label">⚡ Paso inmediato</div>
+          <div class="ac-title">Hablá hoy con esta persona en privado</div>
+          <div class="ac-text">No es urgente llamar ahora mismo, pero sí es importante actuar hoy. Buscá un momento tranquilo y privado para iniciar la conversación.</div>
+        </div>
+
+        <div class="frase-card">
+          <div class="fc-label">💬 Frase para empezar</div>
+          <div class="fc-text">"Noté que últimamente estás diferente y me importa cómo estás. ¿Podemos hablar un momento?"</div>
+        </div>
+
+        <div class="nohacer-card">
+          <div class="nh-label">⚠ No hagas esto</div>
+          <div class="nh-item"><span>✗</span>Minimizar: "seguro es una etapa"</div>
+          <div class="nh-item"><span>✗</span>Preguntar el motivo antes de escuchar</div>
+          <div class="nh-item"><span>✗</span>Prometer guardar secretos que no podés</div>
+        </div>
+
+        <button class="btn btn-azul" onclick="goTo('sc-hablar')">💬 Ver guía completa "Cómo hablar"</button>
+
+        <div class="section-label">Si la situación empeora — llamar a:</div>
+        <button class="call-btn">
+          <span>📞</span><span class="call-num">0800 0767</span>
+          <span style="font-size:11px; font-weight:600;">Crisis MSP · 24 hs</span>
+        </button>
+        <div style="background:white; border-radius:8px; padding:12px; border:1.5px solid var(--gris-borde); display:flex; align-items:center; gap:10px;">
+          <span style="font-size:20px;">🏥</span>
+          <div style="flex:1">
+            <div style="font-size:12px; font-weight:700; color:var(--negro);">Centro Comunal N°8</div>
+            <div style="font-size:10px; color:var(--gris-sub);">Psicólogo · Hoy hasta las 18:00</div>
+          </div>
+          <button class="dir-call-btn">Llamar</button>
+        </div>
+        <button class="btn btn-ghost" onclick="goTo('sc-dir')">📋 Ver todos los recursos</button>
+
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         PANTALLA 4 · CÓMO HABLAR
+    ═══════════════════════════════════════ -->
+    <div class="screen" id="sc-hablar">
+      <div class="app-header">
+        <div class="back-row" onclick="goTo('sc-home')">← Inicio</div>
+        <h2>💬 Cómo hablar</h2>
+        <p>Guía de conversación segura · Sin formación clínica requerida</p>
+      </div>
+      <div class="sit-tabs">
+        <button class="sit-tab active" onclick="setSit(0)">
+          <span class="st-icon">⚠️</span>
+          <span class="st-label">Comentarios preocupantes</span>
+        </button>
+        <button class="sit-tab" onclick="setSit(1)">
+          <span class="st-icon">😰</span>
+          <span class="st-label">Crisis emocional aguda</span>
+        </button>
+        <button class="sit-tab" onclick="setSit(2)">
+          <span class="st-icon">🔇</span>
+          <span class="st-label">Aislamiento sostenido</span>
+        </button>
+      </div>
+      <div class="screen-scroll" id="hablar-scroll">
+
+        <!-- SIT 0: COMENTARIOS PREOCUPANTES -->
+        <div class="sit-panel active" id="sit-0">
+          <div class="alert-banner banner-rojo">
+            <div class="ab-icon">⚠️</div>
+            <div>
+              <div class="ab-title t-rojo">Comentarios preocupantes</div>
+              <div class="ab-text t-dark-rojo">Escuchaste algo que te llamó la atención. Preguntar directamente si alguien piensa en hacerse daño <strong>no aumenta el riesgo</strong>. Al contrario, puede aliviar la presión.</div>
+            </div>
+          </div>
+          <div class="section-label">¿Qué podés haber escuchado?</div>
+          <div class="card"><div class="card-body">
+            <div class="signal-item"><div class="sdot sdot-r"></div><div class="signal-text"><strong>"No tiene sentido seguir."</strong> / "Todos estarían mejor sin mí."</div></div>
+            <div class="signal-item"><div class="sdot sdot-r"></div><div class="signal-text"><strong>Regalar objetos</strong> importantes o despedirse de forma inusual.</div></div>
+            <div class="signal-item"><div class="sdot sdot-r"></div><div class="signal-text"><strong>Buscar información</strong> sobre métodos de hacerse daño.</div></div>
+            <div class="signal-item"><div class="sdot sdot-a"></div><div class="signal-text"><strong>"Estoy cansado de todo."</strong> Dicho con intensidad y repetición.</div></div>
+            <div class="signal-item"><div class="sdot sdot-a"></div><div class="signal-text">Calma repentina después de un período de mucha angustia.</div></div>
+          </div></div>
+          <div class="section-label">Pasos a seguir</div>
+          <div class="card"><div class="card-body" style="padding-top:8px; padding-bottom:8px;">
+            <div class="steps">
+              <div class="step-item"><div class="step-num sr">1</div><div><div class="step-title">Buscar un momento privado</div><div class="step-text">Alejate de otras personas. No apures la conversación ni la hagas donde alguien más pueda escuchar.</div></div></div>
+              <div class="step-item"><div class="step-num sr">2</div><div><div class="step-title">Nombrar lo que viste, sin rodeos</div><div class="step-text">Preguntar directamente no aumenta el riesgo. Puede aliviar la presión que siente la persona.</div></div></div>
+              <div class="step-item"><div class="step-num sr">3</div><div><div class="step-title">Escuchar sin juzgar</div><div class="step-text">No necesitás tener respuestas. Tu presencia y atención son lo más importante en este momento.</div></div></div>
+              <div class="step-item"><div class="step-num sr">4</div><div><div class="step-title">No dejarla sola y derivar</div><div class="step-text">Si hay riesgo inmediato, no la dejes sola. Llamá al 0800 0767 o acompañála a la emergencia más cercana.</div></div></div>
+            </div>
+          </div></div>
+          <div class="section-label">Frases para usar</div>
+          <div class="frase-si"><div class="fl">✓ Para abrir la conversación</div><div class="ft">"Escuché lo que dijiste antes y me preocupé. ¿Podemos hablar un momento?"</div></div>
+          <div class="frase-si"><div class="fl">✓ Para preguntar directamente</div><div class="ft">"¿Estás pensando en hacerte daño?" — Se puede preguntar con calma y cuidado.</div></div>
+          <div class="frase-si"><div class="fl">✓ Para mostrar que estás presente</div><div class="ft">"No tenés que estar bien. Estoy acá y tenemos tiempo."</div></div>
+          <div class="frase-no">
+            <div class="fl">✗ Frases que no ayudan</div>
+            <div class="fn-item"><span class="fn-x">✗</span>"Todo tiene solución, animate."</div>
+            <div class="fn-item"><span class="fn-x">✗</span>"Hay gente que está mucho peor."</div>
+            <div class="fn-item"><span class="fn-x">✗</span>"Prometeme que no vas a hacer nada."</div>
+          </div>
+          <div class="frase-porque"><div class="fl">¿Por qué no minimizar?</div><p>Cuando alguien que sufre escucha "animate", siente que su dolor no es real. Eso cierra la conversación y aumenta el aislamiento.</p></div>
+          <div class="section-label">Si reacciona así...</div>
+          <div class="card"><div class="card-body" style="padding:0 14px;">
+            <div class="reaccion-item" id="r0-0"><button class="reaccion-toggle" onclick="toggleR('r0-0')"><div class="rt-left"><span class="rt-emoji">😡</span><span class="rt-label">Se enoja o te dice que te metas en lo tuyo</span></div><span class="rt-arrow">▶</span></button><div class="reaccion-body"><div class="rb-text">Es una reacción frecuente. Mantené la calma y no te retires completamente.</div><div class="rb-frase">"Entiendo que no querés hablar ahora. Voy a estar por acá si cambiás de opinión."</div></div></div>
+            <div class="reaccion-item" id="r0-1"><button class="reaccion-toggle" onclick="toggleR('r0-1')"><div class="rt-left"><span class="rt-emoji">😶</span><span class="rt-label">Se cierra y no responde nada</span></div><span class="rt-arrow">▶</span></button><div class="reaccion-body"><div class="rb-text">El silencio también comunica. No fuerces. Acompañá en silencio si podés.</div><div class="rb-frase">"No tenés que decir nada. Estoy acá."</div></div></div>
+            <div class="reaccion-item" id="r0-2"><button class="reaccion-toggle" onclick="toggleR('r0-2')"><div class="rt-left"><span class="rt-emoji">😭</span><span class="rt-label">Empieza a llorar o a contar mucho</span></div><span class="rt-arrow">▶</span></button><div class="reaccion-body"><div class="rb-text">Es una buena señal. Escuchá y validá lo que siente. No necesitás solucionar nada.</div><div class="rb-frase">"Gracias por contarme. Lo que sentís es importante."</div></div></div>
+            <div class="reaccion-item" id="r0-3"><button class="reaccion-toggle" onclick="toggleR('r0-3')"><div class="rt-left"><span class="rt-emoji">🙏</span><span class="rt-label">Te pide que no le cuentes a nadie</span></div><span class="rt-arrow">▶</span></button><div class="reaccion-body"><div class="rb-text">No prometas secretos que no podés guardar. La honestidad cuida la confianza y a la persona.</div><div class="rb-frase">"No puedo prometerte eso si siento que estás en riesgo. Pero lo vamos a manejar juntos."</div></div></div>
+          </div></div>
+          <div class="section-label">Después de la conversación</div>
+          <div class="card"><div class="card-body">
+            <div class="despues-item"><div class="di-check">✓</div><div class="di-text"><strong>Registrá lo que pasó</strong> — fecha, qué dijiste y qué respondió, aunque sea brevemente.</div></div>
+            <div class="despues-item"><div class="di-check">✓</div><div class="di-text"><strong>Informá a quien corresponda</strong> — dirección, superior o referente institucional.</div></div>
+            <div class="despues-item"><div class="di-check">✓</div><div class="di-text"><strong>Hacé el seguimiento</strong> — volvé a preguntar en los próximos días.</div></div>
+            <div class="despues-item"><div class="di-check">✓</div><div class="di-text"><strong>Cuidate vos también</strong> — estas conversaciones son difíciles. Está bien buscar apoyo.</div></div>
+          </div></div>
+          <button class="btn btn-rojo" onclick="goTo('sc-dir')">📞 Ver recursos para derivar</button>
+          <div class="nota-legal"><p>Basada en la guía mhGAP de la OPS y protocolos del MSP Uruguay. No reemplaza atención profesional.</p></div>
+        </div>
+
+        <!-- SIT 1: CRISIS EMOCIONAL AGUDA -->
+        <div class="sit-panel" id="sit-1">
+          <div class="alert-banner banner-rojo">
+            <div class="ab-icon">😰</div>
+            <div>
+              <div class="ab-title t-rojo">Crisis emocional aguda</div>
+              <div class="ab-text t-dark-rojo">La persona está llorando intensamente, muy angustiada o desbordada. Tu presencia calmada es más útil que cualquier cosa que puedas decir.</div>
+            </div>
+          </div>
+          <div class="tip-box"><div class="ti">💡</div><p><strong>Lo más importante en una crisis:</strong> tu estado emocional se transmite. Si respirás lento y hablás despacio, eso ayuda a la persona a regularse.</p></div>
+          <div class="section-label">Señales de crisis aguda</div>
+          <div class="card"><div class="card-body">
+            <div class="signal-item"><div class="sdot sdot-r"></div><div class="signal-text"><strong>Llanto incontrolable</strong> o incapacidad de calmarse sola.</div></div>
+            <div class="signal-item"><div class="sdot sdot-r"></div><div class="signal-text"><strong>Hiperventilación</strong> o sensación de que le falta el aire.</div></div>
+            <div class="signal-item"><div class="sdot sdot-r"></div><div class="signal-text"><strong>Mirada fija o ausente</strong>, respuestas muy lentas (posible disociación).</div></div>
+            <div class="signal-item"><div class="sdot sdot-r"></div><div class="signal-text"><strong>Agitación motora</strong>: no puede quedarse quieta, se mueve de forma repetitiva.</div></div>
+            <div class="signal-item"><div class="sdot sdot-a"></div><div class="signal-text"><strong>Afirma que no puede más</strong> y no puede precisar con qué.</div></div>
+          </div></div>
+          <div class="section-label">Pasos a seguir</div>
+          <div class="card"><div class="card-body" style="padding-top:8px; padding-bottom:8px;">
+            <div class="steps">
+              <div class="step-item"><div class="step-num sr">1</div><div><div class="step-title">Mantenete calmado/a vos</div><div class="step-text">Tu estado se transmite. Respirá lento y hablá despacio.</div></div></div>
+              <div class="step-item"><div class="step-num sr">2</div><div><div class="step-title">Ir a un lugar tranquilo</div><div class="step-text">Sacar a la persona de estímulos (ruido, miradas). Un espacio sin mucha gente ayuda.</div></div></div>
+              <div class="step-item"><div class="step-num sr">3</div><div><div class="step-title">Acompañar sin apurar</div><div class="step-text">No digas "calmáte". Respirá vos lento y dejá que te vea hacerlo.</div></div></div>
+              <div class="step-item"><div class="step-num sr">4</div><div><div class="step-title">Conectar con el presente</div><div class="step-text">Pedile que nombre cosas que ve alrededor. Ayuda a anclarla si está disociada.</div></div></div>
+              <div class="step-item"><div class="step-num sr">5</div><div><div class="step-title">Evaluar si necesita ayuda profesional</div><div class="step-text">Si la crisis no baja en 10–15 minutos, llamá al 0800 0767 o acompañála a emergencia.</div></div></div>
+            </div>
+          </div></div>
+          <div class="section-label">Frases que ayudan</div>
+          <div class="frase-si"><div class="fl">✓ Para acompañar sin presionar</div><div class="ft">"Estoy acá. No tenés que hacer nada ahora mismo."</div></div>
+          <div class="frase-si"><div class="fl">✓ Para conectar con el presente</div><div class="ft">"¿Podés decirme tres cosas que ves en esta habitación?"</div></div>
+          <div class="frase-si"><div class="fl">✓ Para validar sin dramatizar</div><div class="ft">"Lo que estás sintiendo es muy intenso. Tiene sentido que estés así."</div></div>
+          <div class="frase-no">
+            <div class="fl">✗ Frases que empeoran la crisis</div>
+            <div class="fn-item"><span class="fn-x">✗</span>"Calmáte." / "Respirá." — No funciona cuando la persona está desbordada.</div>
+            <div class="fn-item"><span class="fn-x">✗</span>"Pero si no pasó nada grave."</div>
+            <div class="fn-item"><span class="fn-x">✗</span>Tocar a la persona sin pedirle permiso primero.</div>
+          </div>
+          <div class="section-label">Si reacciona así...</div>
+          <div class="card"><div class="card-body" style="padding:0 14px;">
+            <div class="reaccion-item" id="r1-0"><button class="reaccion-toggle" onclick="toggleR('r1-0')"><div class="rt-left"><span class="rt-emoji">🌀</span><span class="rt-label">Parece no escuchar, está "ausente"</span></div><span class="rt-arrow">▶</span></button><div class="reaccion-body"><div class="rb-text">Puede ser disociación. Hablá despacio, usá su nombre, pedile que mire algo concreto.</div><div class="rb-frase">"[Nombre], estoy acá. ¿Podés mirarme?"</div></div></div>
+            <div class="reaccion-item" id="r1-1"><button class="reaccion-toggle" onclick="toggleR('r1-1')"><div class="rt-left"><span class="rt-emoji">😤</span><span class="rt-label">Tiene un arrebato de enojo o agresividad</span></div><span class="rt-arrow">▶</span></button><div class="reaccion-body"><div class="rb-text">No respondas con enojo. Dejá espacio físico. El enojo en crisis es una descarga de angustia.</div><div class="rb-frase">"Entiendo que estás muy enojado/a. Voy a quedarme acá cuando estés listo/a."</div></div></div>
+            <div class="reaccion-item" id="r1-2"><button class="reaccion-toggle" onclick="toggleR('r1-2')"><div class="rt-left"><span class="rt-emoji">🏃</span><span class="rt-label">Quiere irse y alejarse de todo</span></div><span class="rt-arrow">▶</span></button><div class="reaccion-body"><div class="rb-text">No la retengas físicamente. Pedile que se quede, pero si se va, acompañála desde una distancia y avisá a quien corresponda.</div><div class="rb-frase">"¿Podés decirme a dónde vas? Me gustaría que no estuvieras sola ahora."</div></div></div>
+          </div></div>
+          <button class="call-btn">📞 <span class="call-num">0800 0767</span> <span style="font-size:11px; font-weight:600;">Crisis MSP · 24 hs</span></button>
+          <button class="btn btn-ghost" onclick="goTo('sc-dir')" style="margin-top:-4px;">📍 Ver emergencias cercanas</button>
+          <div class="nota-legal"><p>Basada en la guía mhGAP de la OPS y protocolos del MSP Uruguay. No reemplaza atención profesional.</p></div>
+        </div>
+
+        <!-- SIT 2: AISLAMIENTO SOSTENIDO -->
+        <div class="sit-panel" id="sit-2">
+          <div class="alert-banner banner-amar">
+            <div class="ab-icon">🔇</div>
+            <div>
+              <div class="ab-title t-amar">Aislamiento o cambios sostenidos</div>
+              <div class="ab-text t-dark-amar">Notaste cambios en los últimos días o semanas. No hay urgencia inmediata, pero es importante actuar pronto. A veces lo que una persona necesita es que alguien note que algo cambió.</div>
+            </div>
+          </div>
+          <div class="tip-box"><div class="ti">⏳</div><p>Esta situación <strong>no requiere llamar ahora</strong>, pero sí que alguien se acerque. Tu intuición como referente vale: si algo te llama la atención, prestá atención.</p></div>
+          <div class="section-label">Señales de cambio sostenido</div>
+          <div class="card"><div class="card-body">
+            <div class="signal-item"><div class="sdot sdot-a"></div><div class="signal-text"><strong>Dejó de juntarse</strong> con compañeros o familia sin explicación clara.</div></div>
+            <div class="signal-item"><div class="sdot sdot-a"></div><div class="signal-text"><strong>Cambios en el rendimiento</strong> o participación: antes activo, ahora ausente.</div></div>
+            <div class="signal-item"><div class="sdot sdot-a"></div><div class="signal-text"><strong>Cambios físicos visibles</strong>: descuido personal, cansancio, cambio de peso.</div></div>
+            <div class="signal-item"><div class="sdot sdot-a"></div><div class="signal-text"><strong>Responde poco</strong> cuando antes era comunicativo, o al revés.</div></div>
+            <div class="signal-item"><div class="sdot sdot-b"></div><div class="signal-text"><strong>"Algo no está bien"</strong> — tu intuición como referente vale.</div></div>
+          </div></div>
+          <div class="section-label">Pasos a seguir</div>
+          <div class="card"><div class="card-body" style="padding-top:8px; padding-bottom:8px;">
+            <div class="steps">
+              <div class="step-item"><div class="step-num">1</div><div><div class="step-title">Acercarte de forma natural</div><div class="step-text">Un momento informal — en el pasillo, en el recreo — puede ser suficiente para abrir la puerta.</div></div></div>
+              <div class="step-item"><div class="step-num">2</div><div><div class="step-title">Nombrar lo que observaste sin suponer</div><div class="step-text">Describí lo que viste y preguntá. Eso muestra que prestás atención sin asumir nada.</div></div></div>
+              <div class="step-item"><div class="step-num">3</div><div><div class="step-title">Escuchar lo que salga</div><div class="step-text">Puede que diga "nada". Puede que cuente algo. Lo importante es que notó que alguien se interesó.</div></div></div>
+              <div class="step-item"><div class="step-num">4</div><div><div class="step-title">Dejar la puerta abierta</div><div class="step-text">No es una sola conversación. Decile que estás disponible y seguí prestando atención.</div></div></div>
+              <div class="step-item"><div class="step-num">5</div><div><div class="step-title">Evaluar si escalar</div><div class="step-text">Si sigue igual en una semana, o aparecen señales más graves, buscá apoyo profesional.</div></div></div>
+            </div>
+          </div></div>
+          <div class="section-label">Frases para acercarse</div>
+          <div class="frase-si"><div class="fl">✓ Para abrir sin presionar</div><div class="ft">"Te noto diferente últimamente y quería preguntarte cómo estás. Sin apuro."</div></div>
+          <div class="frase-si"><div class="fl">✓ Para describir sin suponer</div><div class="ft">"Vi que hace unos días no estás viniendo a... ¿está todo bien?"</div></div>
+          <div class="frase-si"><div class="fl">✓ Para dejar la puerta abierta</div><div class="ft">"No tenés que contarme todo. Solo quería que supieras que estoy por acá si necesitás algo."</div></div>
+          <div class="frase-no">
+            <div class="fl">✗ Frases que cierran la conversación</div>
+            <div class="fn-item"><span class="fn-x">✗</span>"¿Por qué no venís más? Todos te extrañan." — Genera culpa.</div>
+            <div class="fn-item"><span class="fn-x">✗</span>"Tenés que salir más, eso te va a hacer bien." — Da consejos antes de entender.</div>
+            <div class="fn-item"><span class="fn-x">✗</span>"A todos nos pasan cosas, hay que seguir." — Minimiza.</div>
+          </div>
+          <div class="section-label">Si reacciona así...</div>
+          <div class="card"><div class="card-body" style="padding:0 14px;">
+            <div class="reaccion-item" id="r2-0"><button class="reaccion-toggle" onclick="toggleR('r2-0')"><div class="rt-left"><span class="rt-emoji">🤷</span><span class="rt-label">"Estoy bien" / lo niega todo</span></div><span class="rt-arrow">▶</span></button><div class="reaccion-body"><div class="rb-text">No insistas en ese momento. La confianza se construye con el tiempo. Seguí presente en los días siguientes.</div><div class="rb-frase">"Bueno, me alegra. Igual, ya sabés que podés hablar conmigo si algo cambia."</div></div></div>
+            <div class="reaccion-item" id="r2-1"><button class="reaccion-toggle" onclick="toggleR('r2-1')"><div class="rt-left"><span class="rt-emoji">💬</span><span class="rt-label">Empieza a contar algo difícil</span></div><span class="rt-arrow">▶</span></button><div class="reaccion-body"><div class="rb-text">Escuchá sin interrumpir. Validá lo que contó antes de ofrecer cualquier solución.</div><div class="rb-frase">"Gracias por contarme. Eso que describís suena muy pesado de cargar solo/a."</div></div></div>
+            <div class="reaccion-item" id="r2-2"><button class="reaccion-toggle" onclick="toggleR('r2-2')"><div class="rt-left"><span class="rt-emoji">😔</span><span class="rt-label">Dice que no sirve hablar con nadie</span></div><span class="rt-arrow">▶</span></button><div class="reaccion-body"><div class="rb-text">No contradigas esa creencia de frente. Reconocé que otras experiencias pueden haber sido frustrantes.</div><div class="rb-frase">"Entiendo que quizás antes no funcionó. Yo solo quiero escucharte, sin darte consejos si no los pedís."</div></div></div>
+          </div></div>
+          <div class="section-label">¿Cuándo escalar a ayuda profesional?</div>
+          <div class="card"><div class="card-body">
+            <div class="despues-item"><div class="di-check">⚑</div><div class="di-text">Si el aislamiento se mantiene o empeora después de una semana.</div></div>
+            <div class="despues-item"><div class="di-check">⚑</div><div class="di-text">Si aparecen comentarios preocupantes o signos de crisis aguda.</div></div>
+            <div class="despues-item"><div class="di-check">⚑</div><div class="di-text">Si la persona no tiene ninguna otra red de apoyo.</div></div>
+            <div class="despues-item"><div class="di-check">⚑</div><div class="di-text">Si tu intuición te dice que hay algo más serio detrás.</div></div>
+          </div></div>
+          <button class="btn btn-azul" onclick="goTo('sc-dir')">📋 Ver cómo derivar en mi departamento</button>
+          <div class="nota-legal"><p>Basada en la guía mhGAP de la OPS y protocolos del MSP Uruguay. No reemplaza atención profesional.</p></div>
+        </div>
+
+      </div><!-- /hablar scroll -->
+    </div><!-- /sc-hablar -->
+
+    <!-- ════════════════════════════════════════
+         PANTALLA 5 · DIRECTORIO
+    ═══════════════════════════════════════ -->
+    <div class="screen" id="sc-dir">
+      <div class="dir-header">
+        <div class="back-row" onclick="goTo('sc-home')" style="font-size:12px; color:rgba(255,255,255,0.7); display:flex; align-items:center; gap:6px; margin-bottom:8px; cursor:pointer;">← Inicio</div>
+        <h2>Recursos en Montevideo</h2>
+        <p>📍 Detectado automáticamente · Actualizado hoy</p>
+      </div>
+      <div class="screen-scroll">
+        <div class="search-bar">
+          <span>🔍</span>
+          <input type="text" placeholder="Buscar recurso o zona..." />
+        </div>
+        <div class="filter-row">
+          <div class="fchip active">Todos</div>
+          <div class="fchip">Crisis 24 hs</div>
+          <div class="fchip">Salud mental</div>
+          <div class="fchip">Adolescentes</div>
+          <div class="fchip">Violencia</div>
+        </div>
+        <div class="dir-divider">Líneas 24 horas</div>
+        <div class="dir-item">
+          <div class="dir-ico di-r">🆘</div>
+          <div class="dir-inf">
+            <div class="di-name">Línea de Crisis MSP</div>
+            <div class="di-sub"><span class="avail avail-on"></span>Disponible ahora</div>
+            <div class="di-num">0800 0767</div>
+          </div>
+          <div class="dir-acts">
+            <button class="dir-call-btn">Llamar</button>
+            <div class="di-hours">24 hs · gratuita</div>
+          </div>
+        </div>
+        <div class="dir-item">
+          <div class="dir-ico di-r">📞</div>
+          <div class="dir-inf">
+            <div class="di-name">Línea de Violencia MIDES</div>
+            <div class="di-sub"><span class="avail avail-on"></span>Disponible ahora</div>
+            <div class="di-num">0800 4141</div>
+          </div>
+          <div class="dir-acts">
+            <button class="dir-call-btn">Llamar</button>
+            <div class="di-hours">24 hs · gratuita</div>
+          </div>
+        </div>
+        <div class="dir-divider">Servicios de salud mental</div>
+        <div class="dir-item">
+          <div class="dir-ico di-b">🏥</div>
+          <div class="dir-inf">
+            <div class="di-name">Centro Comunal N°8</div>
+            <div class="di-sub"><span class="avail avail-on"></span>Abierto · Hasta las 18:00</div>
+            <div class="di-num">2400 3000</div>
+          </div>
+          <div class="dir-acts">
+            <button class="dir-call-btn">Llamar</button>
+            <div class="di-hours">Lun–Vie</div>
+          </div>
+        </div>
+        <div class="dir-item">
+          <div class="dir-ico di-b">🧑‍⚕️</div>
+          <div class="dir-inf">
+            <div class="di-name">Policlínica ASSE Reducto</div>
+            <div class="di-sub"><span class="avail avail-off"></span>Abre mañana 8:00</div>
+            <div class="di-num">2203 1180</div>
+          </div>
+          <div class="dir-acts">
+            <button class="dir-call-btn">Llamar</button>
+            <div class="di-hours">Lun–Vie</div>
+          </div>
+        </div>
+        <div class="dir-item">
+          <div class="dir-ico di-b">🏫</div>
+          <div class="dir-inf">
+            <div class="di-name">RAP Zona Este · ASSE</div>
+            <div class="di-sub"><span class="avail avail-on"></span>Abierto · Hasta las 20:00</div>
+            <div class="di-num">2222 3456</div>
+          </div>
+          <div class="dir-acts">
+            <button class="dir-call-btn">Llamar</button>
+            <div class="di-hours">Lun–Sáb</div>
+          </div>
+        </div>
+        <div class="dir-divider">Organizaciones comunitarias</div>
+        <div class="dir-item">
+          <div class="dir-ico di-v">🤝</div>
+          <div class="dir-inf">
+            <div class="di-name">Grupo Prevención Suicidio Mvd</div>
+            <div class="di-sub">Dirección Deptl. de Salud</div>
+            <div class="di-num">2200 1234</div>
+          </div>
+          <div class="dir-acts">
+            <button class="dir-call-btn">Llamar</button>
+            <div class="di-hours">Lun–Vie</div>
+          </div>
+        </div>
+        <div class="dir-item">
+          <div class="dir-ico di-v">👥</div>
+          <div class="dir-inf">
+            <div class="di-name">Red de Apoyo Comunitario</div>
+            <div class="di-sub">MIDES · Montevideo</div>
+            <div class="di-num">0800 7363</div>
+          </div>
+          <div class="dir-acts">
+            <button class="dir-call-btn">Llamar</button>
+            <div class="di-hours">Lun–Vie</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- ════════════════════════════════════════
+         PANTALLA 7 · SEÑALES DE ALERTA
+    ═══════════════════════════════════════ -->
+    <div class="screen" id="sc-senales">
+      <div class="signal-header">
+        <div class="back-row" onclick="goTo('sc-home')" style="font-size:12px; color:rgba(255,255,255,0.75); display:flex; align-items:center; gap:6px; margin-bottom:8px; cursor:pointer;">← Inicio</div>
+        <h2>🔎 Señales de alerta</h2>
+        <p>Qué observar · Cuándo y cómo actuar</p>
+      </div>
+
+      <div class="signal-cat-tabs">
+        <button class="sct active" onclick="setSignalCat(0)">
+          <span class="sct-icon">👤</span>
+          <span class="sct-label">Comporta-miento</span>
+        </button>
+        <button class="sct" onclick="setSignalCat(1)">
+          <span class="sct-icon">💬</span>
+          <span class="sct-label">Lo que dice</span>
+        </button>
+        <button class="sct" onclick="setSignalCat(2)">
+          <span class="sct-icon">🧍</span>
+          <span class="sct-label">Lo físico</span>
+        </button>
+        <button class="sct" onclick="setSignalCat(3)">
+          <span class="sct-icon">⏱️</span>
+          <span class="sct-label">Cuándo actuar</span>
+        </button>
+      </div>
+
+      <div class="screen-scroll" id="senales-scroll">
+
+        <!-- ── CAT 0: COMPORTAMIENTO ── -->
+        <div class="signal-cat active" id="scat-0">
+
+          <div class="tip-box">
+            <div class="ti">💡</div>
+            <p><strong>Clave:</strong> no es una señal aislada lo que importa, sino <strong>cambios sostenidos</strong> respecto a cómo era esa persona antes.</p>
+          </div>
+
+          <div class="signal-group">
+            <div class="signal-group-header">
+              <span class="sgh-icon">🔴</span>
+              <span class="sgh-title">Alta preocupación — actuar hoy</span>
+            </div>
+            <div class="signal-group-body">
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-r">Urgente</span>
+                <div class="sig-text"><strong>Regalar objetos importantes</strong> o despedirse de personas cercanas de forma inusual.</div>
+              </div>
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-r">Urgente</span>
+                <div class="sig-text"><strong>Buscar información</strong> sobre métodos de hacerse daño.</div>
+              </div>
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-r">Urgente</span>
+                <div class="sig-text"><strong>Calma repentina</strong> después de un período largo de mucha angustia.</div>
+              </div>
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-r">Urgente</span>
+                <div class="sig-text"><strong>Aislamiento brusco</strong> y completo de todas sus redes de apoyo al mismo tiempo.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="signal-group">
+            <div class="signal-group-header">
+              <span class="sgh-icon">🟡</span>
+              <span class="sgh-title">Preocupante — actuar pronto</span>
+            </div>
+            <div class="signal-group-body">
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-a">Atención</span>
+                <div class="sig-text"><strong>Dejar de participar</strong> en actividades que antes disfrutaba, sin explicación.</div>
+              </div>
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-a">Atención</span>
+                <div class="sig-text"><strong>Caída sostenida del rendimiento</strong> en el trabajo, estudio o tareas habituales.</div>
+              </div>
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-a">Atención</span>
+                <div class="sig-text"><strong>Cambios bruscos de humor:</strong> muy irritable, muy triste, o alternando entre ambos.</div>
+              </div>
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-a">Atención</span>
+                <div class="sig-text"><strong>Aumento del consumo</strong> de alcohol u otras sustancias.</div>
+              </div>
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-a">Atención</span>
+                <div class="sig-text"><strong>Faltas frecuentes</strong> o llegadas tarde donde antes era puntual.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="signal-group">
+            <div class="signal-group-header">
+              <span class="sgh-icon">🔵</span>
+              <span class="sgh-title">A seguir de cerca</span>
+            </div>
+            <div class="signal-group-body">
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-b">Observar</span>
+                <div class="sig-text"><strong>Responde menos</strong> que antes: más distante, monosílabos, se desconecta.</div>
+              </div>
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-b">Observar</span>
+                <div class="sig-text"><strong>Cambios en el sueño o la alimentación:</strong> come o duerme mucho más o mucho menos.</div>
+              </div>
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-b">Observar</span>
+                <div class="sig-text"><strong>Tu intuición:</strong> algo te llama la atención aunque no puedas nombrarlo. Ese dato vale.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-prompt" onclick="goTo('sc-hablar')">
+            <div class="ap-icon">💬</div>
+            <div class="ap-text">
+              <div class="ap-title">¿Ya detectaste algo?</div>
+              <div class="ap-sub">Ir a "Cómo hablar" para el siguiente paso</div>
+            </div>
+            <div class="ap-arr">→</div>
+          </div>
+
+        </div><!-- /scat-0 -->
+
+        <!-- ── CAT 1: LO QUE DICE ── -->
+        <div class="signal-cat" id="scat-1">
+
+          <div class="tip-box">
+            <div class="ti">⚠️</div>
+            <p>Las palabras son señales directas. <strong>Nunca minimices lo que alguien dice sobre hacerse daño</strong>, aunque parezca dicho al pasar o "de broma".</p>
+          </div>
+
+          <div class="signal-group">
+            <div class="signal-group-header">
+              <span class="sgh-icon">🔴</span>
+              <span class="sgh-title">Actuar ahora mismo</span>
+            </div>
+            <div class="signal-group-body">
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-r">Urgente</span>
+                <div class="sig-text"><strong>"No tiene sentido seguir."</strong> / "Sería mejor no estar acá."</div>
+              </div>
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-r">Urgente</span>
+                <div class="sig-text"><strong>"Todos estarían mejor sin mí."</strong> / "Soy una carga para los demás."</div>
+              </div>
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-r">Urgente</span>
+                <div class="sig-text"><strong>Mencionar un método concreto</strong> o un plan para hacerse daño.</div>
+              </div>
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-r">Urgente</span>
+                <div class="sig-text"><strong>"Ya sé qué voy a hacer"</strong> sin aclarar de qué habla, dicho con calma inusual.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="signal-group">
+            <div class="signal-group-header">
+              <span class="sgh-icon">🟡</span>
+              <span class="sgh-title">Actuar pronto — esta semana</span>
+            </div>
+            <div class="signal-group-body">
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-a">Atención</span>
+                <div class="sig-text"><strong>"Estoy muy cansado de todo"</strong> dicho con intensidad y repetición, no como queja habitual.</div>
+              </div>
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-a">Atención</span>
+                <div class="sig-text"><strong>"No aguanto más"</strong> / "No puedo seguir así" referido a la vida en general.</div>
+              </div>
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-a">Atención</span>
+                <div class="sig-text"><strong>Hablar mucho sobre la muerte</strong> o sobre el suicidio de otros de forma repetitiva.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="signal-group">
+            <div class="signal-group-header">
+              <span class="sgh-icon">🔵</span>
+              <span class="sgh-title">Prestar atención — seguir de cerca</span>
+            </div>
+            <div class="signal-group-body">
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-b">Observar</span>
+                <div class="sig-text"><strong>"Nadie me entiende"</strong> / "Estoy solo/a" repetido en múltiples conversaciones.</div>
+              </div>
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-b">Observar</span>
+                <div class="sig-text"><strong>"Para qué sirvo"</strong> / "No valgo nada" dicho con convicción, no como modestia.</div>
+              </div>
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-b">Observar</span>
+                <div class="sig-text"><strong>Despedidas inusuales</strong> al terminar una conversación normal.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="frase-porque" style="margin-top:2px;">
+            <div class="fl" style="font-size:9px; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:var(--amarillo); margin-bottom:4px;">¿Y si lo dijo "en broma"?</div>
+            <p style="font-size:11px; color:#5C3A00; line-height:1.45;">El humor o la ironía no reducen el riesgo. Muchas personas hablan de hacerse daño de forma indirecta porque no saben cómo pedirlo directamente. <strong>Tomá en serio todo lo que escuchés</strong> y preguntá.</p>
+          </div>
+
+          <div class="action-prompt" onclick="goTo('sc-hablar')">
+            <div class="ap-icon">💬</div>
+            <div class="ap-text">
+              <div class="ap-title">¿Escuchaste algo preocupante?</div>
+              <div class="ap-sub">Ver cómo responder en "Cómo hablar"</div>
+            </div>
+            <div class="ap-arr">→</div>
+          </div>
+
+        </div><!-- /scat-1 -->
+
+        <!-- ── CAT 2: LO FÍSICO ── -->
+        <div class="signal-cat" id="scat-2">
+
+          <div class="tip-box">
+            <div class="ti">👁️</div>
+            <p>Las señales físicas son visibles pero fáciles de ignorar. <strong>Un cambio sostenido</strong> en la apariencia o el cuerpo de alguien puede ser la única señal que esa persona está dando.</p>
+          </div>
+
+          <div class="signal-group">
+            <div class="signal-group-header">
+              <span class="sgh-icon">🔴</span>
+              <span class="sgh-title">Requieren atención inmediata</span>
+            </div>
+            <div class="signal-group-body">
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-r">Urgente</span>
+                <div class="sig-text"><strong>Marcas o heridas visibles</strong> que la persona no explica o minimiza.</div>
+              </div>
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-r">Urgente</span>
+                <div class="sig-text"><strong>Signos de intoxicación o ingesta</strong> de sustancias en contexto de angustia.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="signal-group">
+            <div class="signal-group-header">
+              <span class="sgh-icon">🟡</span>
+              <span class="sgh-title">Cambios preocupantes sostenidos</span>
+            </div>
+            <div class="signal-group-body">
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-a">Atención</span>
+                <div class="sig-text"><strong>Descuido marcado del aspecto personal</strong> en alguien que antes prestaba atención a su apariencia.</div>
+              </div>
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-a">Atención</span>
+                <div class="sig-text"><strong>Pérdida o aumento de peso visible</strong> en pocas semanas sin causa aparente.</div>
+              </div>
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-a">Atención</span>
+                <div class="sig-text"><strong>Agitación visible:</strong> no puede quedarse quieto/a, movimientos repetitivos, tensión corporal constante.</div>
+              </div>
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-a">Atención</span>
+                <div class="sig-text"><strong>Cansancio extremo</strong> y permanente que no mejora con el descanso.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="signal-group">
+            <div class="signal-group-header">
+              <span class="sgh-icon">🔵</span>
+              <span class="sgh-title">A seguir de cerca</span>
+            </div>
+            <div class="signal-group-body">
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-b">Observar</span>
+                <div class="sig-text"><strong>Dolores físicos frecuentes</strong> sin causa médica aparente (cabeza, estómago, espalda).</div>
+              </div>
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-b">Observar</span>
+                <div class="sig-text"><strong>Signos de ansiedad visibles:</strong> temblor de manos, voz entrecortada, respiración agitada frecuente.</div>
+              </div>
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-b">Observar</span>
+                <div class="sig-text"><strong>Mirada ausente o fija</strong> en momentos que no lo justifican.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-prompt" onclick="goTo('sc-hablar')">
+            <div class="ap-icon">💬</div>
+            <div class="ap-text">
+              <div class="ap-title">¿Observaste algo físico?</div>
+              <div class="ap-sub">Ver cómo acercarte en "Cómo hablar"</div>
+            </div>
+            <div class="ap-arr">→</div>
+          </div>
+
+        </div><!-- /scat-2 -->
+
+        <!-- ── CAT 3: CUÁNDO ACTUAR ── -->
+        <div class="signal-cat" id="scat-3">
+
+          <div class="tip-box">
+            <div class="ti">⏱️</div>
+            <p>El momento de actuar no siempre es obvio. Esta guía te ayuda a decidir <strong>qué tan rápido</strong> tenés que intervenir según lo que observás.</p>
+          </div>
+
+          <div class="signal-group">
+            <div class="signal-group-header">
+              <span class="sgh-icon">🚨</span>
+              <span class="sgh-title">Ahora mismo — no esperar</span>
+            </div>
+            <div class="signal-group-body">
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-r">Inmediato</span>
+                <div class="sig-text">La persona <strong>dice que quiere hacerse daño</strong> o tiene un plan concreto.</div>
+              </div>
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-r">Inmediato</span>
+                <div class="sig-text">Hay <strong>señales físicas de que ya se lastimó</strong> o ingirió algo.</div>
+              </div>
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-r">Inmediato</span>
+                <div class="sig-text">La persona está <strong>en crisis activa</strong>: llorando intensamente, desbordada, no responde.</div>
+              </div>
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-r">Inmediato</span>
+                <div class="sig-text">Aparece una <strong>calma repentina</strong> después de una crisis intensa.</div>
+              </div>
+              <div style="background:var(--rojo-pale); border-radius:var(--r-sm); padding:10px 12px; border-left:3px solid var(--rojo);">
+                <div style="font-size:10px; font-weight:700; color:var(--rojo); margin-bottom:4px;">QUÉ HACER</div>
+                <div style="font-size:11px; color:#7B1A1A; line-height:1.5;">No dejes a la persona sola. Llamá al <strong>0800 0767</strong> o acompañala a la emergencia más cercana.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="signal-group">
+            <div class="signal-group-header">
+              <span class="sgh-icon">⚠️</span>
+              <span class="sgh-title">Hoy — antes de que termine el día</span>
+            </div>
+            <div class="signal-group-body">
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-a">Hoy</span>
+                <div class="sig-text">Hizo <strong>comentarios que te preocuparon</strong> sobre no querer seguir o sentirse una carga.</div>
+              </div>
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-a">Hoy</span>
+                <div class="sig-text">Notaste <strong>señales físicas o de comportamiento</strong> de alta preocupación.</div>
+              </div>
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-a">Hoy</span>
+                <div class="sig-text">La situación <strong>empeoró claramente</strong> respecto a los días anteriores.</div>
+              </div>
+              <div style="background:var(--amarillo-bg); border-radius:var(--r-sm); padding:10px 12px; border-left:3px solid var(--amarillo);">
+                <div style="font-size:10px; font-weight:700; color:var(--amarillo); margin-bottom:4px;">QUÉ HACER</div>
+                <div style="font-size:11px; color:#5C3A00; line-height:1.5;">Buscá un momento privado hoy mismo para iniciar una conversación. Usá la guía <strong>"Cómo hablar"</strong>.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="signal-group">
+            <div class="signal-group-header">
+              <span class="sgh-icon">🔵</span>
+              <span class="sgh-title">Esta semana — no dejar pasar</span>
+            </div>
+            <div class="signal-group-body">
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-b">Esta semana</span>
+                <div class="sig-text">Notaste <strong>aislamiento o cambios sostenidos</strong> en los últimos días o semanas.</div>
+              </div>
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-b">Esta semana</span>
+                <div class="sig-text">Tenés <strong>una intuición</strong> de que algo no está bien aunque no puedas nombrarlo.</div>
+              </div>
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-b">Esta semana</span>
+                <div class="sig-text">Ya intentaste acercarte pero la persona <strong>cerró la conversación</strong> — vale intentarlo de nuevo.</div>
+              </div>
+              <div style="background:var(--azul-pale); border-radius:var(--r-sm); padding:10px 12px; border-left:3px solid var(--azul-soft);">
+                <div style="font-size:10px; font-weight:700; color:var(--azul); margin-bottom:4px;">QUÉ HACER</div>
+                <div style="font-size:11px; color:var(--gris-text); line-height:1.5;">Elegí un momento natural para acercarte. No hace falta armar una situación especial. La presencia constante importa.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="action-prompt" onclick="goTo('sc-eval')">
+            <div class="ap-icon">🔍</div>
+            <div class="ap-text">
+              <div class="ap-title">¿No estás seguro/a del nivel de urgencia?</div>
+              <div class="ap-sub">Usá la evaluación guiada para orientarte</div>
+            </div>
+            <div class="ap-arr">→</div>
+          </div>
+
+          <div class="nota-legal"><p>Guía basada en criterios mhGAP (OPS/OMS) y protocolos del MSP Uruguay. No reemplaza evaluación clínica profesional.</p></div>
+
+        </div><!-- /scat-3 -->
+
+      </div><!-- /screen-scroll -->
+    </div><!-- /sc-senales -->
+
+    <!-- ════════════════════════════════════════
+         PANTALLA 6 · FORMACIÓN
+    ═══════════════════════════════════════ -->
+    <div class="screen" id="sc-form">
+      <!-- INDEX VIEW -->
+      <div id="form-index" style="display:flex; flex-direction:column; flex:1; overflow:hidden;">
+        <div class="form-header">
+          <div class="back-row" onclick="goTo('sc-home')" style="font-size:12px; color:rgba(255,255,255,0.7); display:flex; align-items:center; gap:6px; margin-bottom:8px; cursor:pointer;">← Inicio</div>
+          <h2>📖 Formación</h2>
+          <p>Módulos mhGAP · Lectura rápida · Sin formación previa requerida</p>
+          <div class="form-progress-bar">
+            <div class="form-progress-fill" id="form-progress-fill" style="width:0%"></div>
+          </div>
+          <div class="form-progress-label" id="form-progress-label">0 de 5 módulos leídos</div>
+        </div>
+        <div class="screen-scroll">
+
+          <div class="highlight-box">
+            <div class="hb-label">¿Para qué sirve esta sección?</div>
+            <div class="hb-text">Podés leer estos módulos <strong>antes de que ocurra una situación</strong> para estar más preparado/a. No reemplaza la formación profesional, pero te da herramientas concretas para actuar con más seguridad.</div>
+          </div>
+
+          <div class="section-label">Módulos disponibles</div>
+
+          <div class="mod-card" id="mc-0" onclick="openMod(0)">
+            <div class="mod-icon mod-icon-rojo">🧠</div>
+            <div class="mod-info">
+              <div class="mod-num">Módulo 1</div>
+              <div class="mod-title">¿Qué es la salud mental y por qué importa?</div>
+              <div class="mod-meta">5 min · Conceptos base</div>
+            </div>
+            <div class="mod-badge todo" id="mb-0">✓</div>
+          </div>
+
+          <div class="mod-card" id="mc-1" onclick="openMod(1)">
+            <div class="mod-icon mod-icon-amar">🔎</div>
+            <div class="mod-info">
+              <div class="mod-num">Módulo 2</div>
+              <div class="mod-title">Señales de alerta: qué observar y cuándo preocuparse</div>
+              <div class="mod-meta">6 min · Detección temprana</div>
+            </div>
+            <div class="mod-badge todo" id="mb-1">✓</div>
+          </div>
+
+          <div class="mod-card" id="mc-2" onclick="openMod(2)">
+            <div class="mod-icon mod-icon-azul">💬</div>
+            <div class="mod-info">
+              <div class="mod-num">Módulo 3</div>
+              <div class="mod-title">Cómo iniciar una conversación sin hacer daño</div>
+              <div class="mod-meta">5 min · Comunicación segura</div>
+            </div>
+            <div class="mod-badge todo" id="mb-2">✓</div>
+          </div>
+
+          <div class="mod-card" id="mc-3" onclick="openMod(3)">
+            <div class="mod-icon mod-icon-verde">📍</div>
+            <div class="mod-info">
+              <div class="mod-num">Módulo 4</div>
+              <div class="mod-title">Cuándo y cómo derivar a un profesional</div>
+              <div class="mod-meta">4 min · Derivación</div>
+            </div>
+            <div class="mod-badge todo" id="mb-3">✓</div>
+          </div>
+
+          <div class="mod-card" id="mc-4" onclick="openMod(4)">
+            <div class="mod-icon mod-icon-gris">🚫</div>
+            <div class="mod-info">
+              <div class="mod-num">Módulo 5</div>
+              <div class="mod-title">Mitos y realidades sobre la salud mental</div>
+              <div class="mod-meta">4 min · Desmitificación</div>
+            </div>
+            <div class="mod-badge todo" id="mb-4">✓</div>
+          </div>
+
+          <div class="nota-legal"><p>Contenido basado en la guía mhGAP de la OPS/OMS y materiales del curso de prevención del MSP Uruguay 2024. No reemplaza formación clínica profesional.</p></div>
+        </div>
+      </div>
+
+      <!-- ── MÓDULO 1 ── -->
+      <div class="mod-inner" id="mod-0">
+        <div class="mod-inner-header">
+          <div class="back-row" onclick="closeMod()" style="font-size:12px; color:rgba(255,255,255,0.7); display:flex; align-items:center; gap:6px; margin-bottom:8px; cursor:pointer;">← Volver a módulos</div>
+          <div class="mod-inner-num">Módulo 1 de 5</div>
+          <div class="mod-inner-title">¿Qué es la salud mental y por qué importa?</div>
+          <div class="mod-inner-meta">🧠 · 5 min de lectura</div>
+          <div class="mod-read-bar"><div class="mod-read-fill" id="rf-0"></div></div>
+        </div>
+        <div class="screen-scroll" id="ms-0" onscroll="trackRead(0)">
+          <div class="content-block">
+            <div class="cb-head">📌 Idea central</div>
+            <div class="cb-body">La salud mental no es solo la ausencia de enfermedad. Es la capacidad de una persona de <strong>sentirse bien consigo misma, relacionarse con otros y hacer frente a los desafíos de la vida</strong>. Todos tenemos salud mental, igual que todos tenemos salud física.</div>
+          </div>
+          <div class="section-label">¿Por qué es importante para referentes comunitarios?</div>
+          <div class="content-block"><div class="card-body" style="padding:0;">
+            <div class="key-point"><div class="kp-icon">👁️</div><div class="kp-text">Los docentes, policías, taxistas y trabajadores sociales son frecuentemente <strong>las primeras personas</strong> que notan cuando algo no está bien con alguien.</div></div>
+            <div class="key-point"><div class="kp-icon">⏱️</div><div class="kp-text">La detección temprana puede <strong>marcar una diferencia enorme</strong>. Cuanto antes una persona recibe apoyo, mejor es el resultado.</div></div>
+            <div class="key-point"><div class="kp-icon">🤝</div><div class="kp-text">No es necesario ser profesional de salud para <strong>ayudar a alguien a dar el primer paso</strong> hacia la atención que necesita.</div></div>
+            <div class="key-point"><div class="kp-icon">🇺🇾</div><div class="kp-text">En Uruguay, <strong>1 de cada 8 personas</strong> tiene actualmente algún problema de salud mental. Menos del 20% de ellas recibe atención oportuna.</div></div>
+          </div></div>
+          <div class="section-label">¿Qué factores afectan la salud mental?</div>
+          <div class="content-block">
+            <div class="cb-head">🔗 No es solo "cosa de la cabeza"</div>
+            <div class="cb-body">La salud mental está influenciada por múltiples factores que interactúan entre sí:</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:7px; margin-top:10px;">
+              <div style="background:var(--azul-pale); border-radius:8px; padding:9px; font-size:11px; color:var(--gris-text); line-height:1.4;"><strong style="color:var(--azul); display:block; margin-bottom:2px;">Biológicos</strong>Genética, enfermedades, consumo de sustancias</div>
+              <div style="background:var(--amarillo-bg); border-radius:8px; padding:9px; font-size:11px; color:var(--gris-text); line-height:1.4;"><strong style="color:var(--amarillo); display:block; margin-bottom:2px;">Psicológicos</strong>Historia de vida, traumas, formas de pensar</div>
+              <div style="background:var(--verde-bg); border-radius:8px; padding:9px; font-size:11px; color:var(--gris-text); line-height:1.4;"><strong style="color:var(--verde); display:block; margin-bottom:2px;">Sociales</strong>Vínculos, trabajo, vivienda, pobreza</div>
+              <div style="background:var(--rojo-pale); border-radius:8px; padding:9px; font-size:11px; color:var(--gris-text); line-height:1.4;"><strong style="color:var(--rojo); display:block; margin-bottom:2px;">Contextuales</strong>Violencia, desigualdad, aislamiento</div>
+            </div>
+          </div>
+          <div class="highlight-box">
+            <div class="hb-label">💡 Para recordar</div>
+            <div class="hb-text">Los problemas de salud mental <strong>no son debilidad ni elección</strong>. Son tan reales como cualquier enfermedad física. La persona que los vive no siempre puede "salir sola" sin apoyo.</div>
+          </div>
+          <button class="mark-done-btn" id="mdb-0" onclick="markDone(0)">✓ Marcar como leído</button>
+          <button class="btn btn-ghost" onclick="openMod(1)">Siguiente módulo →</button>
+          <div class="nota-legal"><p>Basado en la guía mhGAP OPS/OMS y materiales MSP Uruguay 2024.</p></div>
+        </div>
+      </div>
+
+      <!-- ── MÓDULO 2 ── -->
+      <div class="mod-inner" id="mod-1">
+        <div class="mod-inner-header">
+          <div class="back-row" onclick="closeMod()" style="font-size:12px; color:rgba(255,255,255,0.7); display:flex; align-items:center; gap:6px; margin-bottom:8px; cursor:pointer;">← Volver a módulos</div>
+          <div class="mod-inner-num">Módulo 2 de 5</div>
+          <div class="mod-inner-title">Señales de alerta: qué observar y cuándo preocuparse</div>
+          <div class="mod-inner-meta">🔎 · 6 min de lectura</div>
+          <div class="mod-read-bar"><div class="mod-read-fill" id="rf-1"></div></div>
+        </div>
+        <div class="screen-scroll" id="ms-1" onscroll="trackRead(1)">
+          <div class="highlight-box">
+            <div class="hb-label">🔑 Principio clave</div>
+            <div class="hb-text">No hace falta ver algo dramático para preocuparse. <strong>Los cambios sostenidos</strong> en el comportamiento de una persona son frecuentemente más significativos que los episodios únicos.</div>
+          </div>
+          <div class="section-label">Señales en el comportamiento</div>
+          <div class="content-block"><div class="card-body" style="padding:0;">
+            <div class="key-point"><div class="kp-icon">😶</div><div class="kp-text"><strong>Aislamiento:</strong> deja de participar en actividades que antes disfrutaba, se aparta de amigos o familia sin explicación.</div></div>
+            <div class="key-point"><div class="kp-icon">📉</div><div class="kp-text"><strong>Caída del rendimiento:</strong> baja en el trabajo o el estudio, faltas frecuentes, dificultad para concentrarse.</div></div>
+            <div class="key-point"><div class="kp-icon">😴</div><div class="kp-text"><strong>Cambios en el sueño o la alimentación:</strong> duerme mucho más o mucho menos, come muy poco o en exceso.</div></div>
+            <div class="key-point"><div class="kp-icon">🍺</div><div class="kp-text"><strong>Aumento del consumo</strong> de alcohol u otras sustancias.</div></div>
+            <div class="key-point"><div class="kp-icon">🎭</div><div class="kp-text"><strong>Cambios bruscos de humor:</strong> muy irritable, muy triste o al revés, una calma inusual después de mucha angustia.</div></div>
+          </div></div>
+          <div class="section-label">Señales en lo que dice</div>
+          <div class="content-block"><div class="card-body" style="padding:0;">
+            <div class="key-point"><div class="kp-icon">⚠️</div><div class="kp-text"><strong>"No tiene sentido seguir"</strong> / "Todos estarían mejor sin mí." — Estas frases requieren atención inmediata.</div></div>
+            <div class="key-point"><div class="kp-icon">😔</div><div class="kp-text"><strong>"Estoy muy cansado de todo"</strong> dicho con intensidad y repetición, no como queja habitual.</div></div>
+            <div class="key-point"><div class="kp-icon">🎁</div><div class="kp-text"><strong>Regalar objetos importantes</strong> o despedirse de forma inusual de personas cercanas.</div></div>
+            <div class="key-point"><div class="kp-icon">🔍</div><div class="kp-text"><strong>Buscar información</strong> sobre métodos de hacerse daño o sobre el suicidio.</div></div>
+          </div></div>
+          <div class="section-label">Señales físicas</div>
+          <div class="content-block"><div class="card-body" style="padding:0;">
+            <div class="key-point"><div class="kp-icon">👤</div><div class="kp-text"><strong>Descuido del aspecto personal</strong> en alguien que antes prestaba atención a su apariencia.</div></div>
+            <div class="key-point"><div class="kp-icon">😰</div><div class="kp-text"><strong>Signos físicos de ansiedad:</strong> temblor, sudoración, respiración agitada frecuente.</div></div>
+            <div class="key-point"><div class="kp-icon">🤕</div><div class="kp-text"><strong>Dolores físicos frecuentes</strong> sin causa médica aparente (cabeza, estómago, espalda).</div></div>
+          </div></div>
+          <div class="frase-porque" style="margin-top:4px;">
+            <div class="fl" style="font-size:9px; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:var(--amarillo); margin-bottom:4px;">¿Una sola señal es suficiente para actuar?</div>
+            <p style="font-size:11px; color:#5C3A00; line-height:1.45;">Una señal aislada puede no ser suficiente. <strong>La combinación de varias señales sostenidas en el tiempo</strong> es la clave. Pero si tu intuición te dice que algo no está bien, ese también es un dato válido.</p>
+          </div>
+          <button class="mark-done-btn" id="mdb-1" onclick="markDone(1)">✓ Marcar como leído</button>
+          <button class="btn btn-ghost" onclick="openMod(2)">Siguiente módulo →</button>
+          <div class="nota-legal"><p>Basado en la guía mhGAP OPS/OMS y materiales MSP Uruguay 2024.</p></div>
+        </div>
+      </div>
+
+      <!-- ── MÓDULO 3 ── -->
+      <div class="mod-inner" id="mod-2">
+        <div class="mod-inner-header">
+          <div class="back-row" onclick="closeMod()" style="font-size:12px; color:rgba(255,255,255,0.7); display:flex; align-items:center; gap:6px; margin-bottom:8px; cursor:pointer;">← Volver a módulos</div>
+          <div class="mod-inner-num">Módulo 3 de 5</div>
+          <div class="mod-inner-title">Cómo iniciar una conversación sin hacer daño</div>
+          <div class="mod-inner-meta">💬 · 5 min de lectura</div>
+          <div class="mod-read-bar"><div class="mod-read-fill" id="rf-2"></div></div>
+        </div>
+        <div class="screen-scroll" id="ms-2" onscroll="trackRead(2)">
+          <div class="highlight-box">
+            <div class="hb-label">🔑 Lo más importante antes de empezar</div>
+            <div class="hb-text"><strong>No necesitás tener respuestas.</strong> Tu rol no es resolver el problema de la persona, sino escucharla y conectarla con quien pueda ayudarla. La escucha sin juicio ya es una intervención poderosa.</div>
+          </div>
+          <div class="section-label">Antes de la conversación</div>
+          <div class="content-block"><div class="card-body" style="padding:0;">
+            <div class="key-point"><div class="kp-icon">🔇</div><div class="kp-text"><strong>Buscá privacidad.</strong> La persona necesita saber que nadie más va a escuchar para poder abrirse.</div></div>
+            <div class="key-point"><div class="kp-icon">⏰</div><div class="kp-text"><strong>Elegí un momento sin apuro.</strong> Una conversación interrumpida puede hacer más daño que bien.</div></div>
+            <div class="key-point"><div class="kp-icon">📱</div><div class="kp-text"><strong>Guardá el celular.</strong> La presencia total de tu atención comunica que lo que dice importa.</div></div>
+          </div></div>
+          <div class="section-label">Durante la conversación</div>
+          <div class="content-block"><div class="card-body" style="padding:0;">
+            <div class="key-point"><div class="kp-icon">👂</div><div class="kp-text"><strong>Escuchá más de lo que hablás.</strong> Dejá que la persona termine sus frases. No llenes los silencios de inmediato.</div></div>
+            <div class="key-point"><div class="kp-icon">🪞</div><div class="kp-text"><strong>Validá lo que siente</strong>, aunque no lo entiendas completamente. "Tiene sentido que te sientas así" es más útil que "no debería afectarte tanto".</div></div>
+            <div class="key-point"><div class="kp-icon">❓</div><div class="kp-text"><strong>Podés preguntar directamente</strong> si pensó en hacerse daño. Hacerlo con calma no aumenta el riesgo, y puede ser un alivio para la persona.</div></div>
+            <div class="key-point"><div class="kp-icon">🚫</div><div class="kp-text"><strong>No des consejos rápidos</strong> ni soluciones antes de entender bien la situación.</div></div>
+          </div></div>
+          <div class="section-label">Principio de comunicación segura</div>
+          <div class="frase-si" style="margin:0;"><div class="fl">✓ Frases que abren</div><div class="ft">"Te noto diferente y quería preguntarte cómo estás." / "Lo que sentís es importante, tenemos tiempo."</div></div>
+          <div class="frase-no" style="margin:0;">
+            <div class="fl">✗ Frases que cierran</div>
+            <div class="fn-item"><span class="fn-x">✗</span>"Animate, las cosas podrían ser peores."</div>
+            <div class="fn-item"><span class="fn-x">✗</span>"No pensés en esas cosas."</div>
+            <div class="fn-item"><span class="fn-x">✗</span>"Tenés que ser fuerte."</div>
+          </div>
+          <div class="highlight-box">
+            <div class="hb-label">Si la persona dice que no quiere hablar</div>
+            <div class="hb-text">No insistas en ese momento. Dejá la puerta abierta: <strong>"Entiendo. Estoy acá cuando quieras."</strong> Volvé a intentarlo unos días después.</div>
+          </div>
+          <button class="mark-done-btn" id="mdb-2" onclick="markDone(2)">✓ Marcar como leído</button>
+          <button class="btn btn-ghost" onclick="openMod(3)">Siguiente módulo →</button>
+          <div class="nota-legal"><p>Basado en la guía mhGAP OPS/OMS y materiales MSP Uruguay 2024.</p></div>
+        </div>
+      </div>
+
+      <!-- ── MÓDULO 4 ── -->
+      <div class="mod-inner" id="mod-3">
+        <div class="mod-inner-header">
+          <div class="back-row" onclick="closeMod()" style="font-size:12px; color:rgba(255,255,255,0.7); display:flex; align-items:center; gap:6px; margin-bottom:8px; cursor:pointer;">← Volver a módulos</div>
+          <div class="mod-inner-num">Módulo 4 de 5</div>
+          <div class="mod-inner-title">Cuándo y cómo derivar a un profesional</div>
+          <div class="mod-inner-meta">📍 · 4 min de lectura</div>
+          <div class="mod-read-bar"><div class="mod-read-fill" id="rf-3"></div></div>
+        </div>
+        <div class="screen-scroll" id="ms-3" onscroll="trackRead(3)">
+          <div class="highlight-box">
+            <div class="hb-label">🔑 Tu límite como referente</div>
+            <div class="hb-text">Tu rol es <strong>detectar, acompañar y conectar</strong>, no tratar. Derivar a tiempo es parte de ayudar, no es abandonar a la persona.</div>
+          </div>
+          <div class="section-label">¿Cuándo derivar?</div>
+          <div class="content-block"><div class="card-body" style="padding:0;">
+            <div class="key-point"><div class="kp-icon">🚨</div><div class="kp-text"><strong>De forma urgente (ahora):</strong> si la persona dice que quiere hacerse daño, si tiene un plan concreto o si ya se lastimó. Llamá al 0800 0767 o acompañá a emergencias.</div></div>
+            <div class="key-point"><div class="kp-icon">⚠️</div><div class="kp-text"><strong>Pronto (esta semana):</strong> si hay señales de alerta sostenidas, si mencionó sentirse una carga, si el aislamiento empeora. Contactá el servicio de salud mental más cercano.</div></div>
+            <div class="key-point"><div class="kp-icon">🔍</div><div class="kp-text"><strong>Gradualmente:</strong> si la situación no parece urgente pero te genera preocupación, podés sugerir una consulta y hacer seguimiento en los próximos días.</div></div>
+          </div></div>
+          <div class="section-label">Cómo sugerir ayuda sin que suene a rechazo</div>
+          <div class="frase-si" style="margin:0;"><div class="fl">✓ Así sí</div><div class="ft">"Creo que lo que estás viviendo merece atención de alguien especializado. ¿Te puedo ayudar a encontrar a quién llamar?"</div></div>
+          <div class="frase-si" style="margin:0;"><div class="fl">✓ Así también</div><div class="ft">"No tengo todas las herramientas para ayudarte como lo haría un profesional, pero me importa lo que te pasa y quiero que estés bien."</div></div>
+          <div class="frase-no" style="margin:0;">
+            <div class="fl">✗ Evitá</div>
+            <div class="fn-item"><span class="fn-x">✗</span>"Necesitás ir a un psicólogo." — Dicho sin contexto puede sonar como un rechazo.</div>
+            <div class="fn-item"><span class="fn-x">✗</span>Derivar y desaparecer — Seguí presente después de la derivación.</div>
+          </div>
+          <div class="section-label">Después de derivar</div>
+          <div class="content-block"><div class="card-body" style="padding:0;">
+            <div class="key-point"><div class="kp-icon">✅</div><div class="kp-text"><strong>Hacé seguimiento.</strong> Preguntá unos días después cómo le fue. Ese gesto importa mucho.</div></div>
+            <div class="key-point"><div class="kp-icon">📝</div><div class="kp-text"><strong>Registrá brevemente</strong> la situación: qué observaste, qué hiciste, a quién derivaste.</div></div>
+            <div class="key-point"><div class="kp-icon">🤝</div><div class="kp-text"><strong>No cargues solo/a.</strong> Contá con tu equipo, tu dirección o tu referente institucional para procesar lo que viviste.</div></div>
+          </div></div>
+          <button class="mark-done-btn" id="mdb-3" onclick="markDone(3)">✓ Marcar como leído</button>
+          <button class="btn btn-ghost" onclick="openMod(4)">Siguiente módulo →</button>
+          <button class="btn btn-azul" onclick="goTo('sc-dir')" style="margin-top:-4px;">📋 Ver directorio de recursos</button>
+          <div class="nota-legal"><p>Basado en la guía mhGAP OPS/OMS y materiales MSP Uruguay 2024.</p></div>
+        </div>
+      </div>
+
+      <!-- ── MÓDULO 5 ── -->
+      <div class="mod-inner" id="mod-4">
+        <div class="mod-inner-header">
+          <div class="back-row" onclick="closeMod()" style="font-size:12px; color:rgba(255,255,255,0.7); display:flex; align-items:center; gap:6px; margin-bottom:8px; cursor:pointer;">← Volver a módulos</div>
+          <div class="mod-inner-num">Módulo 5 de 5</div>
+          <div class="mod-inner-title">Mitos y realidades sobre la salud mental</div>
+          <div class="mod-inner-meta">🚫 · 4 min de lectura</div>
+          <div class="mod-read-bar"><div class="mod-read-fill" id="rf-4"></div></div>
+        </div>
+        <div class="screen-scroll" id="ms-4" onscroll="trackRead(4)">
+          <div class="highlight-box">
+            <div class="hb-label">¿Por qué importa conocer los mitos?</div>
+            <div class="hb-text">Los mitos sobre la salud mental hacen que las personas tarden más en pedir ayuda y que quienes los rodean reaccionen de forma inadecuada. <strong>Conocerlos ayuda a actuar mejor.</strong></div>
+          </div>
+
+          <div class="mito-card">
+            <div class="mito-row">
+              <div class="mito-label mito">✗</div>
+              <div class="mito-content mito-bg"><div class="mito-title t-rojo">Mito</div><div class="mito-text t-dark-rojo">"Hablar de suicidio le da ideas a la persona."</div></div>
+            </div>
+            <div class="mito-divider"></div>
+            <div class="mito-row">
+              <div class="mito-label real">✓</div>
+              <div class="mito-content real-bg"><div class="mito-title t-verde">Realidad</div><div class="mito-text t-dark-verde">Preguntar directamente sobre el suicidio <strong>no aumenta el riesgo</strong>. Al contrario, puede aliviar la presión y abrir la puerta a la ayuda. (OMS, mhGAP)</div></div>
+            </div>
+          </div>
+
+          <div class="mito-card">
+            <div class="mito-row">
+              <div class="mito-label mito">✗</div>
+              <div class="mito-content mito-bg"><div class="mito-title t-rojo">Mito</div><div class="mito-text t-dark-rojo">"Quien lo dice no lo hace."</div></div>
+            </div>
+            <div class="mito-divider"></div>
+            <div class="mito-row">
+              <div class="mito-label real">✓</div>
+              <div class="mito-content real-bg"><div class="mito-title t-verde">Realidad</div><div class="mito-text t-dark-verde">La mayoría de las personas que se suicidan <strong>dieron señales previas</strong>. Toda mención debe tomarse en serio.</div></div>
+            </div>
+          </div>
+
+          <div class="mito-card">
+            <div class="mito-row">
+              <div class="mito-label mito">✗</div>
+              <div class="mito-content mito-bg"><div class="mito-title t-rojo">Mito</div><div class="mito-text t-dark-rojo">"Los problemas de salud mental son debilidad de carácter."</div></div>
+            </div>
+            <div class="mito-divider"></div>
+            <div class="mito-row">
+              <div class="mito-label real">✓</div>
+              <div class="mito-content real-bg"><div class="mito-title t-verde">Realidad</div><div class="mito-text t-dark-verde">Son condiciones de salud con causas biológicas, psicológicas y sociales. <strong>No son una elección ni un signo de debilidad.</strong></div></div>
+            </div>
+          </div>
+
+          <div class="mito-card">
+            <div class="mito-row">
+              <div class="mito-label mito">✗</div>
+              <div class="mito-content mito-bg"><div class="mito-title t-rojo">Mito</div><div class="mito-text t-dark-rojo">"Si está tranquilo después de una crisis, ya pasó el peligro."</div></div>
+            </div>
+            <div class="mito-divider"></div>
+            <div class="mito-row">
+              <div class="mito-label real">✓</div>
+              <div class="mito-content real-bg"><div class="mito-title t-verde">Realidad</div><div class="mito-text t-dark-verde">La calma repentina después de mucha angustia puede ser una <strong>señal de alerta</strong>. El período posterior a una crisis es de alto riesgo.</div></div>
+            </div>
+          </div>
+
+          <div class="mito-card">
+            <div class="mito-row">
+              <div class="mito-label mito">✗</div>
+              <div class="mito-content mito-bg"><div class="mito-title t-rojo">Mito</div><div class="mito-text t-dark-rojo">"Solo los psicólogos pueden ayudar."</div></div>
+            </div>
+            <div class="mito-divider"></div>
+            <div class="mito-row">
+              <div class="mito-label real">✓</div>
+              <div class="mito-content real-bg"><div class="mito-title t-verde">Realidad</div><div class="mito-text t-dark-verde">El apoyo de un referente comunitario que escucha sin juzgar y conecta con la ayuda profesional <strong>puede salvar vidas</strong>. Ese es tu rol.</div></div>
+            </div>
+          </div>
+
+          <button class="mark-done-btn" id="mdb-4" onclick="markDone(4)">✓ Marcar como leído</button>
+          <div class="nota-legal"><p>Basado en la guía mhGAP OPS/OMS y materiales MSP Uruguay 2024.</p></div>
+        </div>
+      </div>
+
+    </div><!-- /sc-form -->
+
+    <!-- NAV BAR (siempre visible) -->
+    <div class="nav-bar">
+      <div class="nav-item active" id="nav-home" onclick="goTo('sc-home')">
+        <span class="ni">🏠</span>Inicio
+      </div>
+      <div class="nav-item" id="nav-eval" onclick="goTo('sc-eval')">
+        <span class="ni">🔍</span>Evaluar
+      </div>
+      <div class="nav-item" id="nav-senales" onclick="goTo('sc-senales')">
+        <span class="ni">🔎</span>Señales
+      </div>
+      <div class="nav-item" id="nav-hablar" onclick="goTo('sc-hablar')">
+        <span class="ni">💬</span>Hablar
+      </div>
+      <div class="nav-item" id="nav-dir" onclick="goTo('sc-dir')">
+        <span class="ni">📋</span>Directorio
+      </div>
+    </div>
+
+  </div><!-- /phone-screen -->
+</div><!-- /phone -->
+
+<!-- FLOW LEGEND -->
+<div class="flow-legend">
+  <div class="fl-title">Flujo de navegación</div>
+  <div class="flow-steps">
+    <div class="fs">🏠 Inicio</div>
+    <div class="fa">→</div>
+    <div class="fs">🔎 Señales</div>
+    <div class="fa">→</div>
+    <div class="fs">🔍 Evaluar</div>
+    <div class="fa">→</div>
+    <div class="fs">💬 Cómo hablar</div>
+    <div class="fa">→</div>
+    <div class="fs">📋 Directorio</div>
+    <div class="fa">·</div>
+    <div class="fs">📖 Formación</div>
+  </div>
+</div>
+
+<script>
+// ── NAVEGACIÓN ENTRE PANTALLAS ──
+const screens = ['sc-home','sc-eval','sc-resultado','sc-hablar','sc-dir','sc-form','sc-senales'];
+const navMap  = { 'sc-home':'nav-home', 'sc-eval':'nav-eval',
+                  'sc-resultado':'nav-eval', 'sc-hablar':'nav-hablar', 'sc-dir':'nav-dir',
+                  'sc-form':'nav-dir', 'sc-senales':'nav-senales' };
+
+function goTo(id) {
+  screens.forEach(s => {
+    const el = document.getElementById(s);
+    if (el) el.classList.toggle('active', s === id);
+  });
+  // Nav bar highlight
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const activeNav = navMap[id];
+  if (activeNav) document.getElementById(activeNav).classList.add('active');
+  // Scroll to top
+  const sc = document.getElementById(id);
+  if (sc) { const scroll = sc.querySelector('.screen-scroll'); if (scroll) scroll.scrollTop = 0; }
+}
+
+// ── EVALUACIÓN: PASOS ──
+let evalStep = 1;
+function evalNext(step) {
+  document.getElementById('eval-q1').style.display = step===1 ? 'flex' : 'none';
+  document.getElementById('eval-q2').style.display = step===2 ? 'flex' : 'none';
+  document.getElementById('eval-q3').style.display = step===3 ? 'flex' : 'none';
+  document.getElementById('eval-q1').style.flexDirection = 'column';
+  document.getElementById('eval-q2').style.flexDirection = 'column';
+  document.getElementById('eval-q3').style.flexDirection = 'column';
+  const pct = { 1: '33%', 2: '66%', 3: '100%' };
+  document.getElementById('eval-progress').style.width = pct[step];
+  evalStep = step;
+}
+
+function selectOpt(btn, group) {
+  btn.closest('.question-card').querySelectorAll('.option-btn').forEach(b => {
+    b.classList.remove('sel');
+    b.querySelector('.ob-check').textContent = '';
+  });
+  btn.classList.add('sel');
+  btn.querySelector('.ob-check').textContent = '✓';
+}
+
+// ── CÓMO HABLAR: TABS ──
+function setSit(idx) {
+  document.querySelectorAll('.sit-panel').forEach((p,i) => p.classList.toggle('active', i===idx));
+  document.querySelectorAll('.sit-tab').forEach((t,i) => t.classList.toggle('active', i===idx));
+  const scroll = document.getElementById('hablar-scroll');
+  if (scroll) scroll.scrollTop = 0;
+}
+
+// ── ACORDEONES ──
+function toggleR(id) {
+  const item = document.getElementById(id);
+  const wasOpen = item.classList.contains('open');
+  const panel = item.closest('.sit-panel') || item.closest('.card-body');
+  if (panel) panel.querySelectorAll('.reaccion-item').forEach(r => r.classList.remove('open'));
+  if (!wasOpen) item.classList.add('open');
+}
+
+
+
+// ── SEÑALES DE ALERTA: TABS ──
+function setSignalCat(idx) {
+  document.querySelectorAll('.signal-cat').forEach((p,i) => p.classList.toggle('active', i===idx));
+  document.querySelectorAll('.sct').forEach((t,i) => t.classList.toggle('active', i===idx));
+  const scroll = document.getElementById('senales-scroll');
+  if (scroll) scroll.scrollTop = 0;
+}
+
+// ── FORMACIÓN: MÓDULOS ──
+const modDone = [false, false, false, false, false];
+
+function openMod(idx) {
+  document.getElementById('form-index').style.display = 'none';
+  document.querySelectorAll('.mod-inner').forEach(m => m.classList.remove('active'));
+  const mod = document.getElementById('mod-' + idx);
+  if (mod) {
+    mod.classList.add('active');
+    const scroll = document.getElementById('ms-' + idx);
+    if (scroll) scroll.scrollTop = 0;
+    setTimeout(() => trackRead(idx), 200);
+  }
+}
+
+function closeMod() {
+  document.querySelectorAll('.mod-inner').forEach(m => m.classList.remove('active'));
+  document.getElementById('form-index').style.display = 'flex';
+  document.getElementById('form-index').style.flexDirection = 'column';
+  updateFormProgress();
+}
+
+function markDone(idx) {
+  modDone[idx] = true;
+  const btn = document.getElementById('mdb-' + idx);
+  if (btn) { btn.textContent = '✓ Módulo leído'; btn.classList.add('already'); }
+  const badge = document.getElementById('mb-' + idx);
+  if (badge) { badge.classList.remove('todo'); badge.classList.add('done'); badge.textContent = '✓'; }
+  const card = document.getElementById('mc-' + idx);
+  if (card) card.classList.add('done');
+  updateFormProgress();
+}
+
+function updateFormProgress() {
+  const done = modDone.filter(Boolean).length;
+  const pct = (done / 5) * 100;
+  const fill = document.getElementById('form-progress-fill');
+  const label = document.getElementById('form-progress-label');
+  if (fill) fill.style.width = pct + '%';
+  if (label) label.textContent = done + ' de 5 módulos leídos';
+}
+
+function trackRead(idx) {
+  const scroll = document.getElementById('ms-' + idx);
+  const fill = document.getElementById('rf-' + idx);
+  if (!scroll || !fill) return;
+  const pct = Math.min(100, Math.round((scroll.scrollTop / (scroll.scrollHeight - scroll.clientHeight)) * 100));
+  fill.style.width = Math.max(5, pct) + '%';
+}
+
+// Inicializar eval steps
+document.getElementById('eval-q2').style.display = 'none';
+document.getElementById('eval-q3').style.display = 'none';
+</script>
+</body>
+</html>
