@@ -576,6 +576,55 @@ body {
 .fa { color: var(--gris-sub); font-size: 14px; }
 
 @media (max-width: 420px) { .phone { width: 340px; } }
+
+/* ── MARCAS DE DATOS ILUSTRATIVOS ── */
+.mock-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: #FFF3E0; border: 1px solid #F57C00;
+  border-radius: 4px; padding: 1px 6px;
+  font-size: 9px; font-weight: 700; color: #E65100;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  white-space: nowrap; flex-shrink: 0;
+}
+.mock-badge::before { content: "⚠"; font-size: 9px; }
+
+.mock-banner {
+  background: #FFF3E0; border-left: 3px solid #F57C00;
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  padding: 6px 10px; margin-top: 4px;
+  font-size: 10px; color: #BF360C; line-height: 1.4;
+  display: flex; align-items: flex-start; gap: 6px;
+}
+.mock-banner::before { content: "⚠"; flex-shrink: 0; margin-top: 1px; }
+
+.mock-chip {
+  display: inline-flex; align-items: center; gap: 3px;
+  background: #FFF3E0; border: 1px dashed #F57C00;
+  border-radius: 4px; padding: 2px 7px;
+  font-size: 9px; font-weight: 700; color: #E65100;
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
+
+.dir-item.mock-item {
+  border-color: #FFB74D;
+  background: #FFFDE7;
+}
+.dir-item.mock-item .di-name::after {
+  content: " ⚠";
+  color: #F57C00;
+  font-size: 11px;
+}
+
+.mock-overlay-wrap { position: relative; }
+.mock-label-corner {
+  position: absolute; top: 0; right: 0;
+  background: #F57C00; color: white;
+  font-size: 8px; font-weight: 700;
+  padding: 2px 6px; border-radius: 0 var(--r-sm) 0 6px;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  z-index: 2;
+}
+
 </style>
 </head>
 <body>
@@ -583,6 +632,10 @@ body {
 <div class="page-meta">
   <h1>Red Alerta · App completa</h1>
   <p>Navegá entre pantallas con la barra inferior · Prototipo interactivo</p>
+  <div style="margin-top:8px; background:#FFF3E0; border:1px solid #F57C00; border-radius:8px; padding:8px 14px; font-size:11px; color:#BF360C; display:inline-flex; align-items:center; gap:6px;">
+    <span>⚠</span>
+    <span><b>Prototipo con datos ilustrativos.</b> Los elementos marcados con ⚠ son de ejemplo y no deben usarse en producción.</span>
+  </div>
 </div>
 
 <div class="phone">
@@ -605,7 +658,7 @@ body {
           <h2>Red Alerta</h2>
         </div>
         <div class="tagline">Detección temprana · Salud mental</div>
-        <div class="dept-pill">📍 Montevideo</div>
+        <div class="dept-pill" style="background:rgba(245,124,0,0.25); border:1px solid rgba(245,124,0,0.5);">📍 Montevideo <span style="font-size:9px; opacity:0.8;">⚠ ilustrativo</span></div>
       </div>
       <div class="screen-scroll">
 
@@ -644,29 +697,29 @@ body {
           <div class="cb-left">
             <div class="cb-dot"></div>
             <div>
-              <div class="cb-txt">Línea de Crisis MSP</div>
-              <div class="cb-sub">Disponible ahora mismo</div>
+              <div class="cb-txt">Línea Vida · ASSE</div>
+              <div class="cb-sub">0800 0767 · *0767 celulares · 24 hs</div>
             </div>
           </div>
           <div class="cb-num">0800 0767</div>
         </div>
 
-        <div class="section-label">Recursos cercanos</div>
-        <div class="resource-row">
+        <div class="section-label">Recursos cercanos <span class="mock-chip" style="vertical-align:middle; margin-left:4px;">⚠ ilustrativos</span></div>
+        <div class="resource-row" style="border-color:#FFB74D; background:#FFFDE7;">
           <div class="rr-icon">🏥</div>
-          <div>
-            <div class="rr-title">Centro Comunal N°8</div>
-            <div class="rr-sub">Psicólogo · Montevideo</div>
+          <div style="flex:1">
+            <div class="rr-title">Centro Comunal N°8 <span class="mock-badge">Ilustrativo</span></div>
+            <div class="rr-sub" style="color:#E65100;">Dato de ejemplo — no llamar</div>
           </div>
-          <div class="rr-badge badge-open">Abierto</div>
+          <div class="rr-badge" style="background:#FFF3E0; color:#E65100;">⚠ Ejemplo</div>
         </div>
-        <div class="resource-row">
+        <div class="resource-row" style="border-color:#FFB74D; background:#FFFDE7;">
           <div class="rr-icon">📞</div>
-          <div>
-            <div class="rr-title">Línea de Violencia</div>
-            <div class="rr-sub">MIDES · 0800 4141</div>
+          <div style="flex:1">
+            <div class="rr-title">Línea de Violencia · MIDES</div>
+            <div class="rr-sub">0800 4141 · Número real</div>
           </div>
-          <div class="rr-badge badge-24h">24 hs</div>
+          <div class="rr-badge" style="background:#FFF3E0; color:#E65100;">⚠ Verificar horario</div>
         </div>
 
       </div>
@@ -765,6 +818,7 @@ body {
     ═══════════════════════════════════════ -->
     <div class="screen" id="sc-resultado">
       <div class="result-header">
+        <div class="mock-banner" style="background:rgba(255,255,255,0.2); border-left-color:rgba(255,255,255,0.8); color:white; margin-bottom:10px; border-radius:6px;">Plan generado con lógica ilustrativa — pendiente validación clínica antes de uso real.</div>
         <div class="semaforo-row">
           <div class="sem sem-r"></div>
           <div class="sem sem-a on"></div>
@@ -800,13 +854,13 @@ body {
           <span>📞</span><span class="call-num">0800 0767</span>
           <span style="font-size:11px; font-weight:600;">Crisis MSP · 24 hs</span>
         </button>
-        <div style="background:white; border-radius:8px; padding:12px; border:1.5px solid var(--gris-borde); display:flex; align-items:center; gap:10px;">
+        <div style="background:#FFFDE7; border-radius:8px; padding:12px; border:1.5px solid #FFB74D; display:flex; align-items:center; gap:10px;">
           <span style="font-size:20px;">🏥</span>
           <div style="flex:1">
-            <div style="font-size:12px; font-weight:700; color:var(--negro);">Centro Comunal N°8</div>
-            <div style="font-size:10px; color:var(--gris-sub);">Psicólogo · Hoy hasta las 18:00</div>
+            <div style="font-size:12px; font-weight:700; color:var(--negro);">Centro Comunal N°8 <span class="mock-badge">Ilustrativo</span></div>
+            <div style="font-size:10px; color:#E65100;">Dato de ejemplo — no llamar</div>
           </div>
-          <button class="dir-call-btn">Llamar</button>
+          <button class="dir-call-btn" style="opacity:0.5;cursor:not-allowed;">—</button>
         </div>
         <button class="btn btn-ghost" onclick="goTo('sc-dir')">📋 Ver todos los recursos</button>
 
@@ -821,6 +875,7 @@ body {
         <div class="back-row" onclick="goTo('sc-home')">← Inicio</div>
         <h2>💬 Cómo hablar</h2>
         <p>Guía de conversación segura · Sin formación clínica requerida</p>
+        <div style="background:rgba(255,255,255,0.15); border-radius:6px; padding:5px 10px; margin-top:8px; font-size:10px; color:rgba(255,255,255,0.85); display:flex; align-items:center; gap:5px;"><span>⚠</span>Frases y pasos ilustrativos — pendientes de validación contra documentos MSP Uruguay.</div>
       </div>
       <div class="sit-tabs">
         <button class="sit-tab active" onclick="setSit(0)">
@@ -1010,6 +1065,7 @@ body {
         <p>📍 Detectado automáticamente · Actualizado hoy</p>
       </div>
       <div class="screen-scroll">
+        <div class="mock-banner" style="margin-bottom:2px; border-radius:var(--r-sm);">Solo la Línea Vida (0800 0767 / *0767) y el 0800 1920 son números reales y verificados. Los demás recursos son datos ilustrativos de ejemplo.</div>
         <div class="search-bar">
           <span>🔍</span>
           <input type="text" placeholder="Buscar recurso o zona..." />
@@ -1025,87 +1081,94 @@ body {
         <div class="dir-item">
           <div class="dir-ico di-r">🆘</div>
           <div class="dir-inf">
-            <div class="di-name">Línea de Crisis MSP</div>
+            <div class="di-name">Línea Vida · ASSE</div>
             <div class="di-sub"><span class="avail avail-on"></span>Disponible ahora</div>
             <div class="di-num">0800 0767</div>
+            <div class="di-num" style="font-size:11px; color:var(--azul-soft); margin-top:2px;">*0767 desde celulares</div>
           </div>
           <div class="dir-acts">
             <button class="dir-call-btn">Llamar</button>
             <div class="di-hours">24 hs · gratuita</div>
           </div>
         </div>
-        <div class="dir-item">
+        <div class="dir-item mock-item">
           <div class="dir-ico di-r">📞</div>
           <div class="dir-inf">
             <div class="di-name">Línea de Violencia MIDES</div>
-            <div class="di-sub"><span class="avail avail-on"></span>Disponible ahora</div>
+            <div class="di-sub"><span class="avail avail-on"></span>Número real · horario a verificar</div>
             <div class="di-num">0800 4141</div>
+            <div class="mock-banner">Número real. Horario ilustrativo — verificar antes de publicar.</div>
           </div>
           <div class="dir-acts">
             <button class="dir-call-btn">Llamar</button>
-            <div class="di-hours">24 hs · gratuita</div>
+            <div class="di-hours"><span class="mock-chip">⚠ verificar</span></div>
           </div>
         </div>
         <div class="dir-divider">Servicios de salud mental</div>
-        <div class="dir-item">
+        <div class="dir-item mock-item">
           <div class="dir-ico di-b">🏥</div>
           <div class="dir-inf">
-            <div class="di-name">Centro Comunal N°8</div>
-            <div class="di-sub"><span class="avail avail-on"></span>Abierto · Hasta las 18:00</div>
+            <div class="di-name">Centro Comunal N°8 <span class="mock-badge">Ilustrativo</span></div>
+            <div class="di-sub"><span class="avail avail-on"></span>Datos de ejemplo</div>
             <div class="di-num">2400 3000</div>
+            <div class="mock-banner">Recurso y número de ejemplo. Reemplazar con datos reales del MSP/ASSE.</div>
           </div>
           <div class="dir-acts">
-            <button class="dir-call-btn">Llamar</button>
-            <div class="di-hours">Lun–Vie</div>
+            <button class="dir-call-btn" style="opacity:0.5;cursor:not-allowed;">Llamar</button>
+            <div class="di-hours">—</div>
           </div>
         </div>
-        <div class="dir-item">
+        <div class="dir-item mock-item">
           <div class="dir-ico di-b">🧑‍⚕️</div>
           <div class="dir-inf">
-            <div class="di-name">Policlínica ASSE Reducto</div>
-            <div class="di-sub"><span class="avail avail-off"></span>Abre mañana 8:00</div>
+            <div class="di-name">Policlínica ASSE Reducto <span class="mock-badge">Ilustrativo</span></div>
+            <div class="di-sub"><span class="avail avail-off"></span>Datos de ejemplo</div>
             <div class="di-num">2203 1180</div>
+            <div class="mock-banner">Recurso y número de ejemplo. Reemplazar con datos reales del MSP/ASSE.</div>
           </div>
           <div class="dir-acts">
-            <button class="dir-call-btn">Llamar</button>
-            <div class="di-hours">Lun–Vie</div>
+            <button class="dir-call-btn" style="opacity:0.5;cursor:not-allowed;">Llamar</button>
+            <div class="di-hours">—</div>
           </div>
         </div>
-        <div class="dir-item">
+        <div class="dir-item mock-item">
           <div class="dir-ico di-b">🏫</div>
           <div class="dir-inf">
-            <div class="di-name">RAP Zona Este · ASSE</div>
-            <div class="di-sub"><span class="avail avail-on"></span>Abierto · Hasta las 20:00</div>
+            <div class="di-name">RAP Zona Este · ASSE <span class="mock-badge">Ilustrativo</span></div>
+            <div class="di-sub"><span class="avail avail-on"></span>Datos de ejemplo</div>
             <div class="di-num">2222 3456</div>
+            <div class="mock-banner">Recurso y número de ejemplo. Reemplazar con datos reales del MSP/ASSE.</div>
           </div>
           <div class="dir-acts">
-            <button class="dir-call-btn">Llamar</button>
-            <div class="di-hours">Lun–Sáb</div>
+            <button class="dir-call-btn" style="opacity:0.5;cursor:not-allowed;">Llamar</button>
+            <div class="di-hours">—</div>
           </div>
         </div>
         <div class="dir-divider">Organizaciones comunitarias</div>
-        <div class="dir-item">
+        <div class="dir-item mock-item">
           <div class="dir-ico di-v">🤝</div>
           <div class="dir-inf">
-            <div class="di-name">Grupo Prevención Suicidio Mvd</div>
+            <div class="di-name">Grupo Prevención Suicidio Mvd <span class="mock-badge">Ilustrativo</span></div>
             <div class="di-sub">Dirección Deptl. de Salud</div>
             <div class="di-num">2200 1234</div>
+            <div class="mock-banner">Recurso y número de ejemplo. Reemplazar con datos reales (Ord. 315/2022).</div>
           </div>
           <div class="dir-acts">
-            <button class="dir-call-btn">Llamar</button>
-            <div class="di-hours">Lun–Vie</div>
+            <button class="dir-call-btn" style="opacity:0.5;cursor:not-allowed;">Llamar</button>
+            <div class="di-hours">—</div>
           </div>
         </div>
-        <div class="dir-item">
+        <div class="dir-item mock-item">
           <div class="dir-ico di-v">👥</div>
           <div class="dir-inf">
-            <div class="di-name">Red de Apoyo Comunitario</div>
+            <div class="di-name">Red de Apoyo Comunitario <span class="mock-badge">Ilustrativo</span></div>
             <div class="di-sub">MIDES · Montevideo</div>
             <div class="di-num">0800 7363</div>
+            <div class="mock-banner">Recurso y número de ejemplo. Reemplazar con datos reales del MIDES.</div>
           </div>
           <div class="dir-acts">
-            <button class="dir-call-btn">Llamar</button>
-            <div class="di-hours">Lun–Vie</div>
+            <button class="dir-call-btn" style="opacity:0.5;cursor:not-allowed;">Llamar</button>
+            <div class="di-hours">—</div>
           </div>
         </div>
       </div>
@@ -1118,6 +1181,7 @@ body {
     ═══════════════════════════════════════ -->
     <div class="screen" id="sc-senales">
       <div class="signal-header">
+        <div style="background:rgba(255,255,255,0.15); border-radius:6px; padding:6px 10px; margin-bottom:8px; font-size:10px; color:rgba(255,255,255,0.9); display:flex; align-items:center; gap:6px;"><span>⚠</span>Clasificación de niveles (urgente/atención/observar) ilustrativa — pendiente validación clínica.</div>
         <div class="back-row" onclick="goTo('sc-home')" style="font-size:12px; color:rgba(255,255,255,0.75); display:flex; align-items:center; gap:6px; margin-bottom:8px; cursor:pointer;">← Inicio</div>
         <h2>🔎 Señales de alerta</h2>
         <p>Qué observar · Cuándo y cómo actuar</p>
@@ -1252,6 +1316,10 @@ body {
               <span class="sgh-title">Actuar ahora mismo</span>
             </div>
             <div class="signal-group-body">
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-r">Urgente</span>
+                <div class="sig-text"><strong>"Quiero morirme"</strong> / "Me quiero morir" — dicho de forma directa o repetida.</div>
+              </div>
               <div class="sig-item">
                 <span class="sig-pill sig-pill-r">Urgente</span>
                 <div class="sig-text"><strong>"No tiene sentido seguir."</strong> / "Sería mejor no estar acá."</div>
@@ -1441,6 +1509,10 @@ body {
                 <span class="sig-pill sig-pill-r">Inmediato</span>
                 <div class="sig-text">Aparece una <strong>calma repentina</strong> después de una crisis intensa.</div>
               </div>
+              <div class="sig-item">
+                <span class="sig-pill sig-pill-r">Inmediato</span>
+                <div class="sig-text">Sabés o te contaron que tuvo <strong>intentos de autoeliminación previos (IAE)</strong> — es el factor de riesgo más importante.</div>
+              </div>
               <div style="background:var(--rojo-pale); border-radius:var(--r-sm); padding:10px 12px; border-left:3px solid var(--rojo);">
                 <div style="font-size:10px; font-weight:700; color:var(--rojo); margin-bottom:4px;">QUÉ HACER</div>
                 <div style="font-size:11px; color:#7B1A1A; line-height:1.5;">No dejes a la persona sola. Llamá al <strong>0800 0767</strong> o acompañala a la emergencia más cercana.</div>
@@ -1524,6 +1596,7 @@ body {
           <div class="back-row" onclick="goTo('sc-home')" style="font-size:12px; color:rgba(255,255,255,0.7); display:flex; align-items:center; gap:6px; margin-bottom:8px; cursor:pointer;">← Inicio</div>
           <h2>📖 Formación</h2>
           <p>Módulos mhGAP · Lectura rápida · Sin formación previa requerida</p>
+          <div style="background:rgba(255,255,255,0.15); border-radius:6px; padding:5px 10px; margin-top:8px; font-size:10px; color:rgba(255,255,255,0.85); display:flex; align-items:center; gap:5px;"><span>⚠</span>Contenido ilustrativo basado en mhGAP — pendiente ajuste contra materiales MSP Uruguay 2024.</div>
           <div class="form-progress-bar">
             <div class="form-progress-fill" id="form-progress-fill" style="width:0%"></div>
           </div>
@@ -2014,4 +2087,3 @@ document.getElementById('eval-q3').style.display = 'none';
 </script>
 </body>
 </html>
-<!-- republicar GitHub Pages -->
